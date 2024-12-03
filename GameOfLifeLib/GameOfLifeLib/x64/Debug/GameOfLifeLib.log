@@ -1,6 +1,8 @@
 ﻿  pch.cpp
   dllmain.cpp
   Macro.cpp
+D:\COURS 24-25\GameOfLife\GameOfLifeLib\Macro.cpp(73,51): warning C4018: '>=': signed/unsigned mismatch
+D:\COURS 24-25\GameOfLife\GameOfLifeLib\Macro.cpp(79,49): warning C4018: '>=': signed/unsigned mismatch
   Generating Code...
      Creating library D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.lib and object D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.exp
   GameOfLifeLib.vcxproj -> D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.dll

@@ -29,48 +29,62 @@ void System::MaximizeConsole()
 
 
 /* =============== Intéraction Utilisateur =============== */
-void UserInteraction::DisplayMenu(const string* _options, const int _currentIndex, const u_int& _optionsCount, const string& _question)
+void UserInteraction::DisplayMenu(const string* _options, const pair<int, int>& _pairOfIndexes, const u_int& _optionsCount, const string& _question)
 {
-	system("cls");
-	DISPLAY("=============== Actions ===============", true);
+	string _firstSymbol = "[";
+	string _secondSymbol = "]";
+	
+	DISPLAY("============================== Actions ==============================", true);
 	for (u_int _index = 0; _index < _optionsCount; _index++)
 	{
-		DISPLAY(_index + 1 << " -\t" << _options[_index], true);
-	}
-	DISPLAY("=======================================", true);
-}
-
-int UserInteraction::OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question)
-{
-	u_int _currentIndex = 0;
-	DisplayMenu(_options, _currentIndex, _optionsCount, _question);
-	do
-	{
-		if (_kbhit())
+		if (_pairOfIndexes.first != _index && _pairOfIndexes.second != _index)
 		{
-			// Attendre une touche
-			u_int _input = 0;
-			_input = _getch();
-
-			// Si la touche est entrée, alors _isChoiceMade = true
-			switch (_input)
-			{
-			case 13: // Entrer
-				return _currentIndex;
-			case 72: // Fleche Haut ↑
-				_currentIndex = (_currentIndex <= 0 ? _optionsCount : _currentIndex - 1);
-				break;
-			case 80: // Fleche Bas ↓
-				_currentIndex = (_currentIndex >= _optionsCount ? 0 : _currentIndex + 1);
-				break;
-			default:
-				break;
-			}
-			system("cls");
-			DisplayMenu(_options, _currentIndex, _optionsCount, _question);
+			_firstSymbol = "";
+			_secondSymbol = "";
+		}
+		else
+		{
+			_firstSymbol = "[";
+			_secondSymbol = "]";
 		}
 
-	} while (true);
+		DISPLAY(_firstSymbol << _options[_index] << _secondSymbol << "\t\t", false);
+	}
+	DISPLAY("\n=====================================================================", true);
+}
+
+pair<int, int> UserInteraction::OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question, pair<int, int> _pairOfIndexes)
+{
+	if (_kbhit())
+	{
+		// Attendre une touche
+		u_int _input = 0;
+		_input = _getch();
+
+		// Si la touche est entrée, alors _isChoiceMade = true
+		switch (_input)
+		{
+		case 13: // Entrer
+			return _pairOfIndexes;
+		case 75: // Fleche Haut <-
+			_pairOfIndexes.second = (_pairOfIndexes.second <= 0 ? _optionsCount : _pairOfIndexes.second - 1);
+			break;
+		case 77: // Fleche Bas ->
+			_pairOfIndexes.second = (_pairOfIndexes.second >= _optionsCount ? 0 : _pairOfIndexes.second + 1);
+			break;
+		case 72: // Fleche Haut ↑
+			_pairOfIndexes.first = (_pairOfIndexes.first <= 0 ? _optionsCount : _pairOfIndexes.first - _optionsCount);
+			break;
+		case 80: // Fleche Bas ↓
+			_pairOfIndexes.first = (_pairOfIndexes.first >= _optionsCount ? 0 : _pairOfIndexes.first + _optionsCount);
+			break;
+		default:
+			break;
+		}
+		DisplayMenu(_options, _pairOfIndexes, _optionsCount, _question);
+	}
+	return _pairOfIndexes;
+	
 }
 
 int UserInteraction::GetInputByUser()

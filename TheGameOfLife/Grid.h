@@ -9,6 +9,7 @@ class Grid
 	u_int width;
 
 public:
+	Grid() = default;
 	Grid(const u_int& _length, const u_int& _width);
 private:
 	void Setup();
