@@ -7,6 +7,7 @@
 #endif
 
 #include <iostream>
+#include <Windows.h>
 #include <fstream>
 #include <string>
 #include <random>
@@ -55,8 +56,6 @@ namespace System
 
 namespace UserInteraction
 {
-	template <typename ReturnType>
-	GAMEOFLIFELIB__API ReturnType Retrieve(const string& _question);
 
 	/// <summary>
 	/// Affiche une liste de string proprement avec l'index sur le coté
