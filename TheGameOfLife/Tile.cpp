@@ -1,9 +1,9 @@
 #include "Tile.h"
 
-Tile::Tile(const Coordinate& _coordinate)
+Tile::Tile(Coordinate* _coordinate)
 {
 	coordinate = _coordinate;
-	appearance = ".";
+	appearance = RESET;
 	weight = 0;
 }
 
@@ -11,6 +11,22 @@ Tile::Tile(const string& _appearance, const u_int& _weight)
 {
 	appearance = _appearance;
 	weight = _weight;
+}
+
+void Tile::UpdateWeight(const int _point)
+{
+	weight += _point;
+	weight %= 4;
+	if (weight != 3 && appearance == RESET) return;
+	else if (weight == 3 && appearance == RESET)
+	{
+		appearance = WHITE_BG;
+		return;
+	}
+	else
+	{
+		appearance = RESET;
+	}
 }
 
 void Tile::UpdateCell(const string& _appearance, const u_int& _weight)

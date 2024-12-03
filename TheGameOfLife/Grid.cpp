@@ -1,5 +1,12 @@
 #include "Grid.h"
 
+Grid::Grid()
+{
+	length = 10;
+	width = 10;
+	Setup();
+}
+
 Grid::Grid(const u_int& _length, const u_int& _width)
 {
 	length = _length;
@@ -10,26 +17,22 @@ Grid::Grid(const u_int& _length, const u_int& _width)
 void Grid::Setup()
 {
 	// vector temporaire
-	vector<Tile> _temp;
-	for (int _rowIndex = 0; _rowIndex < length; _rowIndex++)
+	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
 	{
-		for (int _colIndex = 0; _colIndex < width; _colIndex++)
+		vector<Tile*> _temp;
+		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
 		{
-			_temp.push_back(Coordinate(_rowIndex , _colIndex ));
+			Tile* _newTile = new Tile(new Coordinate(_rowIndex, _colIndex));
+			_temp.push_back(_newTile);
 		}
 
 		// ajoute la ranger de Tile à la Grid
 		tiles.push_back(_temp);
 
-		// pop sinon _temp va garder les précédents en mémoire
-		for (int _index = 0; _index < width; _index++)
-		{
-			_temp.pop_back();
-		}
 	}
 }
 
-void Grid::Display(const bool _withGrid) const
+void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect) const
 {
 	
 	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
@@ -39,7 +42,7 @@ void Grid::Display(const bool _withGrid) const
 			DISPLAY("+", false);
 			for (u_int _index = 0; _index < width; _index++)
 			{
-				DISPLAY("---", false);
+				DISPLAY("----", false);
 				DISPLAY("+", false);
 			}
 			DISPLAY("", true);
@@ -47,9 +50,24 @@ void Grid::Display(const bool _withGrid) const
 		
 		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
 		{
-			if (_withGrid) DISPLAY("| ", false);
-			tiles[_rowIndex][_colIndex].Display();
-			DISPLAY(" ", false);
+			string _firstSymbol = "";
+			string _secondSymbol = "";
+
+			if (_withGrid) DISPLAY("|", false);
+
+			if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex)
+			{
+				_firstSymbol = "[ ";
+				_secondSymbol = " ]";
+				DISPLAY(_firstSymbol, false);
+				tiles[_rowIndex][_colIndex]->Display();
+				DISPLAY(_secondSymbol, false);
+			}
+			else
+			{
+				DISPLAY("    ", false);
+				tiles[_rowIndex][_colIndex]->Display();
+			}
 		}
 		if (_withGrid) DISPLAY("|", true);
 	}
@@ -58,8 +76,10 @@ void Grid::Display(const bool _withGrid) const
 		for (u_int _index = 0; _index < width; _index++)
 		{
 			DISPLAY("+", false);
-			DISPLAY("---", false);
+			DISPLAY("----", false);
 		}
 		DISPLAY("+", true);
 	}
+
+	DISPLAY("\nPress Echap to Quit\t\tPress Enter to Select Cell", true);
 }

@@ -1,4 +1,6 @@
 ﻿#include "Game.h"
+#include "UserInteraction.h"
+#include "windows.h"
 
 Game::Game(const Grid& _grid)
 {
@@ -21,33 +23,88 @@ void Game::GiveWeightToTile()
 bool Game::IsOver()
 {
 	// TODO ISOVER
-	return false;
+	return true;
 }
 
 void Game::Loop()
 {
-	string _actions[2]
-	{
-		"Choisir une Cellule à Modifier",
-		"Pochaine Itération",
-	};
-	pair<int, int> _pairOfIndexes = make_pair(0,0);
-	
-	grid.Display(false);
 	do
 	{
-		_pairOfIndexes = UserInteraction::OpenMenu(_actions, 2, "", _pairOfIndexes);
-
-	} while (true);
-
+		SelectionMenu();
+	} while (!IsOver());
 	
 	
 	// TODO LOOP
 }
 
+void Game::SelectionMenu()
+{
+	string _actions[5]
+	{
+		"Choisir une Cellule à Modifier",
+		"Itération Suivante",
+		"Itération Précédente",
+		"Mode Auto",
+		"Quitter"
+	};
+	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
 
+	int _index = 0;
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	do
+	{
 
-pair<int, int> OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question, pair<int, int> _pairOfIndexes)
+		
+		_index = ChooseInputAndRetrieveIndex(_actionsCount - 1, _index);
+		DisplayMenu(_actions, _index, _actionsCount, "Choisit une Action à faire.");
+		SetConsoleCursorPosition(console, { 0,0 });
+
+		
+	} while (true);
+	
+}
+
+void Game::GridMenu()
+{
+	pair<int, int> _pairOfIndexes = make_pair(0, 0);
+
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	do
+	{
+		SetConsoleCursorPosition(console, { 0,0 });
+		_pairOfIndexes = ChooseInputAndRetrieveCoords(grid.GetLength(), _pairOfIndexes);
+
+		// Quitter
+		if (_pairOfIndexes.first == -1 && _pairOfIndexes.second == -1) return;
+
+		grid.Display(true, _pairOfIndexes);
+	} while (true);
+}
+
+void Game::ChooseMenu(const int _menuIndex)
+{
+	switch (_menuIndex)
+	{
+	case 0:
+		system("cls");
+		GridMenu();
+		system("cls");
+		break;
+	case 1:
+		// TODO
+		break;
+	case 2:
+		// TODO
+		break;
+	case 3:
+		// TODO
+		break;
+	case 4:
+		return;
+	}
+}
+
+int Game::ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIndex)
 {
 	if (_kbhit())
 	{
@@ -59,24 +116,18 @@ pair<int, int> OpenMenu(const string* _options, const u_int& _optionsCount, cons
 		switch (_input)
 		{
 		case 13: // Entrer
-			return _pairOfIndexes;
+			ChooseMenu(_currentIndex);
+			break;
 		case 75: // Fleche Haut <-
-			_pairOfIndexes.second = (_pairOfIndexes.second <= 0 ? _optionsCount : _pairOfIndexes.second - 1);
+			_currentIndex = (_currentIndex <= 0 ? _optionsCount : _currentIndex - 1);
 			break;
 		case 77: // Fleche Bas ->
-			_pairOfIndexes.second = (_pairOfIndexes.second >= _optionsCount ? 0 : _pairOfIndexes.second + 1);
-			break;
-		case 72: // Fleche Haut ↑
-			_pairOfIndexes.first = (_pairOfIndexes.first <= 0 ? _optionsCount : _pairOfIndexes.first - _optionsCount);
-			break;
-		case 80: // Fleche Bas ↓
-			_pairOfIndexes.first = (_pairOfIndexes.first >= _optionsCount ? 0 : _pairOfIndexes.first + _optionsCount);
+			_currentIndex = (_currentIndex >= _optionsCount ? 0 : _currentIndex + 1);
 			break;
 		default:
 			break;
 		}
-		DisplayMenu(_options, _pairOfIndexes, _optionsCount, _question);
 	}
-	return _pairOfIndexes;
+	return _currentIndex;
 
 }

@@ -7,6 +7,7 @@
 #endif
 
 #include <iostream>
+#include <Windows.h>
 #include <fstream>
 #include <string>
 #include <random>
@@ -55,16 +56,14 @@ namespace System
 
 namespace UserInteraction
 {
-	template <typename ReturnType>
-	GAMEOFLIFELIB__API ReturnType Retrieve(const string& _question);
 
 	/// <summary>
 	/// Affiche une liste de string proprement avec l'index sur le coté
 	/// </summary>
 	/// <param name="_actionsArray"></param>
-	GAMEOFLIFELIB__API void DisplayMenu(const string* _options, const pair<int, int>& _pairOfIndexes, const u_int& _optionsCount, const string& _question);
+	GAMEOFLIFELIB__API void DisplayMenu(const string* _options, const int _currentIndex, const u_int& _optionsCount, const string& _question);
 
-	GAMEOFLIFELIB__API pair<int, int> OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question, pair<int, int> _pairOfIndexes);
+	GAMEOFLIFELIB__API int OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question);
 	/// <summary>
 	/// Retourne l'input de l'utilisateur si il presse une touche
 	/// </summary>
@@ -98,5 +97,3 @@ namespace Random
 	/// <returns></returns>
 	GAMEOFLIFELIB__API int GetRandomNumberInRange(const int _min, const int _max);
 }
-
-

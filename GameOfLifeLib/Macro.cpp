@@ -50,7 +50,7 @@ void UserInteraction::DisplayMenu(const string* _options, const pair<int, int>& 
 
 		DISPLAY(_firstSymbol << _options[_index] << _secondSymbol << "\t\t", false);
 	}
-	DISPLAY("\n=====================================================================", true);
+	DISPLAY("\n====================================================================", true);
 }
 
 pair<int, int> UserInteraction::OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question, pair<int, int> _pairOfIndexes)
