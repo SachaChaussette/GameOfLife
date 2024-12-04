@@ -134,6 +134,7 @@ void Game::PushCoordinateCellAlive(const Coordinate& _coordinate)
 			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
 		}
 		coordinatesCellAlive.push_back(_coordinateToPush);
+		sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end());
 	}
 }
 
@@ -167,7 +168,7 @@ bool Game::NotInAliveCell(Coordinate _coordinateToCheck)
 	return true;
 }
 
-void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDisplay)
+void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay)
 {
 	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
@@ -176,6 +177,7 @@ void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDispl
 		SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_coordinate->x * 2), static_cast<short>(_coordinate->y)});
 		if (_unDisplay)
 		{
+			if (binary_search(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), _cellCoordinates[_index])) continue;
 			DISPLAY(string(RESET) + "  ", false);
 		}
 		else
@@ -183,7 +185,7 @@ void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDispl
 			grid->GetTile(_coordinate)->Display();
 		}
 	}
-	if (!_unDisplay) Sleep(1000);
+	if (!_unDisplay) Sleep(100);
 }
 
 
@@ -291,7 +293,7 @@ void Game::InitPrimordialSoup()
 {
 	const int _x = grid->GetLength();
 	const int _y = grid->GetLength();
-	const int _numberOfNewCell = (_x * _y) / 5;
+	const u_int& _numberOfNewCell = (_x * _y) / 5;
 	for (u_int _index = 0; _index < _numberOfNewCell; _index++)
 	{
 		InitNewAliveCell(Random::GetRandomNumberInRange(0, _x - 1), Random::GetRandomNumberInRange(0, _y - 1));

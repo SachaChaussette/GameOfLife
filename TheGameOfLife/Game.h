@@ -46,7 +46,7 @@ private:
 	void PushCoordinateCellAlive(const Coordinate& _coordinate);
 	void ResetWeightCell();
 	bool NotInAliveCell(Coordinate _coordinateToCheck);
-	void DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDisplay = false);
+	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false);
 
 public:
 	void Gameloop();
