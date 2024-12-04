@@ -183,7 +183,7 @@ void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDispl
 			grid->GetTile(_coordinate)->Display();
 		}
 	}
-	if (!_unDisplay) Sleep(200);
+	if (!_unDisplay) Sleep(1000);
 }
 
 
@@ -192,11 +192,18 @@ void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDispl
 /// </summary>
 void Game::Gameloop()
 {
+	u_int _generation = 0; 
 	SetConsoleCursorInfo(consoleHandle, &cursorInfo);
-	InitGlider();
+	//InitNewAliveCell(0 , 1);
+	//InitGlider();
 	//InitGun(10 , 10);
+	InitPrimordialSoup();
 	do
 	{
+		if (_generation % 50 == 1) system("cls");
+		_generation += 1;
+		SetConsoleCursorPosition(consoleHandle, { 0, 0});
+		DISPLAY("Generation: " + to_string(_generation), false);
 		DisplayCell(coordinatesCellAlive);
 		AddPointToNeighbourCell();
 		CheckCellAlive();
@@ -278,6 +285,17 @@ void Game::InitGun(const int _x, const int _y)
 	InitNewAliveCell(24 + _x, 1 + _y);
 	InitNewAliveCell(24 + _x, 2 + _y);
 
+}
+
+void Game::InitPrimordialSoup()
+{
+	const int _x = grid->GetLength();
+	const int _y = grid->GetLength();
+	const int _numberOfNewCell = (_x * _y) / 5;
+	for (u_int _index = 0; _index < _numberOfNewCell; _index++)
+	{
+		InitNewAliveCell(Random::GetRandomNumberInRange(0, _x - 1), Random::GetRandomNumberInRange(0, _y - 1));
+	}
 }
 
 /// <summary>

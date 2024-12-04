@@ -54,5 +54,6 @@ public:
 	void InitBlock(const int _x = 0, const int _y = 0);
 	void InitGunPart1(const int _x = 0, const int _y = 0);
 	void InitGun(const int _x = 0 , const int _y = 0);
+	void InitPrimordialSoup();
 	void InitNewAliveCell(const int _x, const int _y);
 };
