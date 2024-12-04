@@ -23,106 +23,6 @@ Game::~Game()
 	delete grid;
 }
 
-void Game::Gameloop()
-{
-	SetConsoleCursorInfo(consoleHandle, &cursorInfo);
-
-	InitGlider();
-	do
-	{
-		SetConsoleCursorPosition(consoleHandle, {0, 0});
-		DisplayGrid();
-		/*grid->Display(false, true);*/
-		AddPointToNeighbourCell();
-		CheckCellAlive();
-		
-
-	} while (!IsOver());
-}
-
-bool Game::IsOver()
-{
-	return coordinatesCellAlive.size() == 0;
-}
-
-void Game::DisplayGrid(const bool _showGrid)
-{
-	grid->Display(_showGrid);
-	DISPLAY("\n\n", true)
-	Sleep(500);
-}
-
-void Game::CheckCellAlive()
-{
-	u_int coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-	for (u_int _index = 0; _index < coordinatesCellAliveSize; _index++)
-	{
-		Coordinate* _coordinateToCheck = coordinatesCellAlive[_index];
-		Tile* _tileToUpdate = grid->GetTile(_coordinateToCheck);
-		if (_tileToUpdate->GetCellState() == CT_DEAD)
-		{
- 			_tileToUpdate->SetAppearance(RESET);
-			coordinatesCellAlive.erase(coordinatesCellAlive.begin()+_index);
-			coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-			--_index;
-		}
-	}
-}
-
-void Game::ResetWeightCell()
-{
-	const u_int coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-	for (u_int _index = 0; _index < coordinatesCellAliveSize; _index++)
-	{
-		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
-		Tile* _tempTile = grid->GetTile(_currentCoordinate);
-		_tempTile->SetWeight(0);
-	}
-}
-
-void Game::InitGlider()
-{
-	Coordinate* _coordinateToTest = grid->GetTile(1, 2)->GetCoordinate();
-	Tile* _tempTile = grid->GetTile(_coordinateToTest);
-	_tempTile->UpdateNeighbourCount(3);
-	PushCellAlive(_coordinateToTest);
-
-	Coordinate* _coordinateToTest2 = grid->GetTile(2, 3)->GetCoordinate();
-	Tile* _tempTile2 = grid->GetTile(_coordinateToTest2);
-	_tempTile2->UpdateNeighbourCount(3);
-	PushCellAlive(_coordinateToTest2);
-
-	Coordinate* _coordinateToTest3 = grid->GetTile(3, 1)->GetCoordinate();
-	Tile* _tempTile3 = grid->GetTile(_coordinateToTest3);
-	_tempTile3->UpdateNeighbourCount(3);
-	PushCellAlive(_coordinateToTest3);
-
-	Coordinate* _coordinateToTest4 = grid->GetTile(3, 2)->GetCoordinate();
-	Tile* _tempTile4 = grid->GetTile(_coordinateToTest4);
-	_tempTile4->UpdateNeighbourCount(3);
-	PushCellAlive(_coordinateToTest4);
-
-	Coordinate* _coordinateToTest5 = grid->GetTile(3, 3)->GetCoordinate();
-	Tile* _tempTile5 = grid->GetTile(_coordinateToTest5);
-	_tempTile5->UpdateNeighbourCount(3);
-	PushCellAlive(_coordinateToTest5);
-}
-
-/// <summary>
-/// Fonction qui sert à debug
-/// </summary>
-void Game::AddPointToAll()
-{
-	u_int _length = grid->GetLength();
-	u_int _width = grid->GetWidth();
-	for (u_int _indexX = 0;  _indexX < _length;  _indexX++)
-	{
-		for (u_int _indexY = 0; _indexY < _width; _indexY++)
-		{
-			grid->GetTile( _indexX , _indexY)->UpdateNeighbourCount(1);
-		}
-	}
-}
 
 void Game::AddPointToNeighbourCell()
 {
@@ -141,52 +41,79 @@ void Game::AddPointToNeighbourCell()
 	};
 
 	vector<Coordinate> _garbageCoord;
-	const u_int coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-	for (u_int _index = 0; _index < coordinatesCellAliveSize; _index++)
+	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
 		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
 		for (Coordinate _direction : _directions)
 		{
-			const int _newX = (_currentCoordinate->x + _direction.x) < 0 ? 0 : (_currentCoordinate->x + _direction.x) != grid->GetLength() ? _currentCoordinate->x + _direction.x : grid->GetLength() - 1;
-			const int _newY = (_currentCoordinate->y + _direction.y) < 0 ? 0 : (_currentCoordinate->y + _direction.y) != grid->GetWidth() ? _currentCoordinate->y + _direction.y : grid->GetLength() - 1;
-			Coordinate _coordinateToChange = { _newX, _newY };
+			Coordinate _coordinateToChange = ComputeNewCoordinate(_currentCoordinate, _direction);
+			if (_coordinateToChange.x < 0 || _coordinateToChange.y < 0) continue;
 			Tile* _tileToUpdate = grid->GetTile(_coordinateToChange);
 			_tileToUpdate->UpdateNeighbourCount(1);
-
-
-			bool _isIn = false;
-			const u_int& _garbageSize = (u_int)_garbageCoord.size();
-			for (u_int _index = 0; _index < _garbageSize; _index++)
-			{
-				if (_garbageCoord[_index] == _coordinateToChange)
-				{
-					_isIn = true;
-					break;
-				}
-			}
-			if (!_isIn) _garbageCoord.push_back(_coordinateToChange);
+			PushInVectorUnique(_garbageCoord, _coordinateToChange);
 		}
 		
 	}
 	const u_int& _garbageSize = (u_int)_garbageCoord.size();
 	for (u_int _index = 0; _index< _garbageSize; _index++)
 	{
-		PushCellAlive(_garbageCoord[_index]);
-		grid->GetTile(_garbageCoord[_index])->SelfMutilate();
+		PushCoordinateCellAlive(_garbageCoord[_index]);
+		if (NotInAliveCell(_garbageCoord[_index]))
+		{
+			grid->GetTile(_garbageCoord[_index])->ResetNeigbourCount();
+		}
 	}
 
 }
 
+void Game::CheckCellAlive()
+{
+	u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+	{
+		Coordinate* _coordinateToCheck = coordinatesCellAlive[_index];
+		Tile* _tileToUpdate = grid->GetTile(_coordinateToCheck);
+		if (_tileToUpdate->GetNeighbourCount() == 0)
+		{
+			_tileToUpdate->UpdateCellState();
+		}
+		if (_tileToUpdate->GetCellState() == CT_DEAD)
+		{
+ 			_tileToUpdate->SetAppearance(RESET);
+			coordinatesCellAlive.erase(coordinatesCellAlive.begin()+_index);
+			_coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+			--_index;
+		}
+	}
+}
 
-void Game::PushCellAlive(Coordinate* _coordinate)
+Coordinate Game::ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coordinate& _direction)
+{
+	int _newX;
+	if ((_newX = _currentCoordinate->x + _direction.x) < 0 || (u_int)_newX >= grid->GetLength())
+	{
+		_newX = -1;
+	}
+
+	int _newY;
+	if ((_newY = _currentCoordinate->y + _direction.y) < 0 || (u_int)_newY >= grid->GetWidth())
+	{
+		_newY = -1;
+	}
+
+	return { _newX, _newY };
+}
+
+void Game::PushCoordinateCellAlive(Coordinate* _coordinate)
 {
 	Tile* _tileToUpdate = grid->GetTile(_coordinate);
 	CellState _currentCellState = _tileToUpdate->UpdateCellState();
 	if (_currentCellState == CT_ALIVE)
 	{
 		Coordinate* _coordinateToPush = _tileToUpdate->GetCoordinate();
-		u_int coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-		for (u_int _index = 0; _index < coordinatesCellAliveSize; _index++)
+		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 		{
 			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
 		}
@@ -194,18 +121,173 @@ void Game::PushCellAlive(Coordinate* _coordinate)
 	}
 }
 
-void Game::PushCellAlive(const Coordinate& _coordinate)
+void Game::PushCoordinateCellAlive(const Coordinate& _coordinate)
 {
 	Tile* _tileToUpdate = grid->GetTile(_coordinate);
 	CellState _currentCellState = _tileToUpdate->UpdateCellState();
 	if (_currentCellState == CT_ALIVE)
 	{
 		Coordinate* _coordinateToPush = _tileToUpdate->GetCoordinate();
-		u_int coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-		for (u_int _index = 0; _index < coordinatesCellAliveSize; _index++)
+		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 		{
 			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
 		}
 		coordinatesCellAlive.push_back(_coordinateToPush);
 	}
+}
+
+/// <summary>
+///  Permet de remettre à 0 le neighbourCount des tiles dans le vector coordinatesCellAlive
+/// </summary>
+void Game::ResetWeightCell()
+{
+	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+	{
+		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
+		Tile* _tempTile = grid->GetTile(_currentCoordinate);
+		_tempTile->SetWeight(0);
+	}
+	oldCoordinatesCellAlive = coordinatesCellAlive;
+}
+
+/// <summary>
+/// Fonction display qui permet de directement display aux coordonner les cellules vivant ou de les undisplay
+/// </summary>
+/// <param name="_cellCoordinates"></param>
+/// <param name="_unDisplay"></param>
+bool Game::NotInAliveCell(Coordinate _coordinateToCheck)
+{
+	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+	{
+		if (_coordinateToCheck == coordinatesCellAlive[_index]) return false;
+	}
+	return true;
+}
+
+void Game::DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDisplay)
+{
+	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+	{
+		Coordinate* _coordinate = _cellCoordinates[_index];
+		SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_coordinate->x * 2), static_cast<short>(_coordinate->y)});
+		if (_unDisplay)
+		{
+			DISPLAY(string(RESET) + "  ", false);
+		}
+		else
+		{
+			grid->GetTile(_coordinate)->Display();
+		}
+	}
+	if (!_unDisplay) Sleep(200);
+}
+
+
+/// <summary>
+/// Boucle de jeux
+/// </summary>
+void Game::Gameloop()
+{
+	SetConsoleCursorInfo(consoleHandle, &cursorInfo);
+	InitGlider();
+	//InitGun(10 , 10);
+	do
+	{
+		DisplayCell(coordinatesCellAlive);
+		AddPointToNeighbourCell();
+		CheckCellAlive();
+		DisplayCell(oldCoordinatesCellAlive, true);
+		
+
+	} while (!IsOver());
+}
+
+/// <summary>
+/// Permet d'initialiser un glider sur une coordonnée donner
+/// </summary>
+/// <param name="_x"></param>
+/// <param name="_y"></param>
+void Game::InitGlider(const int _x, const int _y)
+{
+	InitNewAliveCell(0 + _x, 1 + _y);
+	InitNewAliveCell(1 + _x, 2 + _y);
+	InitNewAliveCell(2 + _x, 0 + _y);
+	InitNewAliveCell(2 + _x, 1 + _y);
+	InitNewAliveCell(2 + _x, 2 + _y);
+}
+
+void Game::InitBlock(const int _x, const int _y)
+{
+	InitNewAliveCell(0 + _x, 0 + _y);
+	InitNewAliveCell(0 + _x, 1 + _y);
+	InitNewAliveCell(1 + _x, 0 + _y);
+	InitNewAliveCell(1 + _x, 1 + _y);
+}
+
+void Game::InitGunPart1(const int _x, const int _y)
+{
+	InitNewAliveCell(10 + _x, _y);
+	InitNewAliveCell(10 + _x, 1 + _y);
+	InitNewAliveCell(10 + _x, 2 + _y);
+
+	InitNewAliveCell(11 + _x, -1 + _y);
+	InitNewAliveCell(11 + _x, 3 + _y);
+
+	InitNewAliveCell(12 + _x, -2 + _y);
+	InitNewAliveCell(12 + _x, 4 + _y);
+
+	InitNewAliveCell(13 + _x, -2 + _y);
+	InitNewAliveCell(13 + _x, 4 + _y);
+
+	InitNewAliveCell(14 + _x, 1 + _y);
+}
+
+void Game::InitGun(const int _x, const int _y)
+{
+	InitBlock(_x, _y);
+	InitBlock(_x + 34, _y - 2);
+
+	InitGunPart1(_x, _y);
+
+	InitNewAliveCell(15 + _x, -1 + _y);
+	InitNewAliveCell(15 + _x, 3 + _y);
+
+	InitNewAliveCell(16 + _x, _y);
+	InitNewAliveCell(16 + _x, 1 + _y);
+	InitNewAliveCell(16 + _x, 2 + _y);
+
+	InitNewAliveCell(17 + _x, 1 + _y);
+
+	InitNewAliveCell(20 + _x, -2 + _y);
+	InitNewAliveCell(20 + _x, -1 + _y);
+	InitNewAliveCell(20 + _x,  _y);
+
+	InitNewAliveCell(21 + _x, -2 + _y);
+	InitNewAliveCell(21 + _x, -1 + _y);
+	InitNewAliveCell(21 + _x, _y);
+
+	InitNewAliveCell(22 + _x, -3 + _y);
+	InitNewAliveCell(22 + _x, 1 + _y);
+
+	InitNewAliveCell(24 + _x, -4 + _y);
+	InitNewAliveCell(24 + _x, -3 + _y);
+	InitNewAliveCell(24 + _x, 1 + _y);
+	InitNewAliveCell(24 + _x, 2 + _y);
+
+}
+
+/// <summary>
+/// Permet d'initialiser une nouvelle cellulle vivante
+/// </summary>
+/// <param name="_x"></param>
+/// <param name="_y"></param>
+void Game::InitNewAliveCell(const int _x, const int _y)
+{
+	Tile* _tempTile = grid->GetTile(_x, _y);
+	_tempTile->UpdateNeighbourCount(3);
+	PushCoordinateCellAlive(_tempTile->GetCoordinate());
 }

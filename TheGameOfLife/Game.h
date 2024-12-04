@@ -9,6 +9,13 @@ class Game
 	CONSOLE_CURSOR_INFO cursorInfo;
 	Grid* grid;
 	vector<Coordinate*> coordinatesCellAlive;
+	vector<Coordinate*> oldCoordinatesCellAlive;
+
+public:
+	inline bool IsOver()
+	{
+		return coordinatesCellAlive.size() == 0;
+	}
 
 public:
 	Game();
@@ -16,17 +23,36 @@ public:
 	~Game();
 
 private:
-	void PushCellAlive(Coordinate* _coordinate);
-	void PushCellAlive(const Coordinate& _coordinate);
+	template<template<typename, typename>class Container, typename Type, typename Allocator = Type>
+	void PushInVectorUnique(Container<Type, Allocator>& _container, Type _newItem)
+	{
+		bool _isIn = false;
+		const u_int& _containerSize = (u_int)_container.size();
+		for (u_int _index = 0; _index < _containerSize; _index++)
+		{
+			if (_container[_index] == _newItem)
+			{
+				_isIn = true;
+				break;
+			}
+		}
+		if (!_isIn) _container.push_back(_newItem);
+
+	}
+	void AddPointToNeighbourCell();
 	void CheckCellAlive();
+	Coordinate ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coordinate& _direction);
+	void PushCoordinateCellAlive(Coordinate* _coordinate);
+	void PushCoordinateCellAlive(const Coordinate& _coordinate);
 	void ResetWeightCell();
-	void InitGlider();
+	bool NotInAliveCell(Coordinate _coordinateToCheck);
+	void DisplayCell(vector<Coordinate*> _cellCoordinates, const bool _unDisplay = false);
 
 public:
 	void Gameloop();
-	bool IsOver();
-	void DisplayGrid(const bool _showGrid = false);
-	void AddPointToAll();
-	void AddPointToNeighbourCell();
+	void InitGlider(const int _x = 0 , const int _y = 0);
+	void InitBlock(const int _x = 0, const int _y = 0);
+	void InitGunPart1(const int _x = 0, const int _y = 0);
+	void InitGun(const int _x = 0 , const int _y = 0);
+	void InitNewAliveCell(const int _x, const int _y);
 };
-

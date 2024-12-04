@@ -20,7 +20,7 @@ Tile::~Tile()
 }
 
 
-void Tile::SelfMutilate()
+void Tile::ResetNeigbourCount()
 {
 	if (!(neighbourCount == 3)) neighbourCount = 0;
 }
@@ -43,8 +43,6 @@ void Tile::UpdateCell(const string& _appearance, const u_int& _weight)
 void Tile::UpdateNeighbourCount(const int _point)
 {
 	neighbourCount += _point;
-	neighbourCount %= 4;
-	
 }
 
 CellState Tile::UpdateCellState()
@@ -58,6 +56,7 @@ CellState Tile::UpdateCellState()
 	}
 	else
 	{
+		neighbourCount = 0;
 		state = CT_DEAD;
 		return state;
 	}

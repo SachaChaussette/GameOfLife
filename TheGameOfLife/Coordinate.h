@@ -18,4 +18,9 @@ struct Coordinate
 	{
 		return _other.x == x && _other.y == y;
 	}
+
+	bool operator==(Coordinate* _other)
+	{
+		return _other->x == x && _other->y == y;
+	}
 };

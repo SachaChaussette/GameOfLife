@@ -63,7 +63,7 @@ public:
 	void UpdateCell(const string& _appearance, const u_int& _weight);
 	void UpdateNeighbourCount(const int _point);
 	CellState UpdateCellState();
-	void SelfMutilate();
+	void ResetNeigbourCount();
 	void Display(const bool _debug = false) const;
 	string ToString(const bool _debug = false);
 };
