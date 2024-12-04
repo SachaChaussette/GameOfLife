@@ -18,13 +18,13 @@
 // ANSI (American National Standards Institute)
 #define BOLD_TEXT "\033[1m"					// Gras
 #define ITALIC_TEXT "\033[3m"				// Italique
-#define UNDERLINE_TEXT "\033[4m"			// Souligné
-#define STRIKETHROUGH_TEXT "\033[9m"		// Barré
+#define UNDERLINE_TEXT "\033[4m"			// Soulign?
+#define STRIKETHROUGH_TEXT "\033[9m"		// Barr?
 #define INVERSE_TEXT "\033[7m"				// Inverse les couleurs
 #define BLINK_TEXT "\033[5m"				// Clignotant
 #define DIM_TEXT "\033[2m"					// Semi-gras
-#define HIDDEN_TEXT "\033[8m"				// Masqué
-#define DOUBLE_UNDERLINE_TEXT "\033[21m"	// Double soulignée
+#define HIDDEN_TEXT "\033[8m"				// Masqu?
+#define DOUBLE_UNDERLINE_TEXT "\033[21m"	// Double soulign?e
 
 // Resets
 #define RESET "\033[0m"
@@ -36,34 +36,49 @@
 #define RESET_STRIKETHROUGH "\033[29m"
 
 // Text colors
-#define BLACK_TEXT "\033[30m"
-#define RED_TEXT "\033[31m"
-#define GREEN_TEXT "\033[32m"
-#define YELLOW_TEXT "\033[33m"
-#define BLUE_TEXT "\033[34m"
-#define MAGENTA_TEXT "\033[35m"
-#define CYAN_TEXT "\033[36m"
-#define WHITE_TEXT "\033[37m"
-
-// Bold text colors
-#define BLACK_BOLD_TEXT "\033[1;30m"
-#define RED_BOLD_TEXT "\033[1;31m"
-#define GREEN_BOLD_TEXT "\033[1;32m"
-#define YELLOW_BOLD_TEXT "\033[1;33m"
-#define BLUE_BOLD_TEXT "\033[1;34m"
-#define MAGENTA_BOLD_TEXT "\033[1;35m"
-#define CYAN_BOLD_TEXT "\033[1;36m"
-#define WHITE_BOLD_TEXT "\033[1;37m"
+#define BLACK "\x1B[38;5;232m"
+#define DARK_GRAY "\x1B[38;5;237m"
+#define GRAY "\x1B[38;5;244m"
+#define LIGHT_GRAY "\x1B[38;5;249m"
+#define WHITE "\x1B[38;5;255m"
+#define DARK_RED "\x1B[38;5;124m"
+#define RED "\x1B[38;5;196m"
+#define DARK_ORANGE "\x1B[38;5;130m"
+#define ORANGE "\x1B[38;5;208m"
+#define DARK_YELLOW "\x1B[38;5;136m"
+#define YELLOW "\x1B[38;5;226m"
+#define LIME "\x1B[38;5;82m"
+#define GREEN "\033[32m"
+#define BLUE "\x1B[38;5;63m"
+#define LIGHT_BLUE "\x1B[38;5;12m"
+#define CYAN "\x1B[38;5;51m"
+#define PINK "\x1B[38;5;219m"
+#define MAGENTA "\x1B[38;5;199m"
+#define PURPLE "\x1B[38;5;99m"
+#define BROWN "\x1B[38;5;130m"
 
 // Background colors
-#define BLACK_BG "\033[40m"
-#define RED_BG "\033[41m"
-#define GREEN_BG "\033[42m"
-#define YELLOW_BG "\033[43m"
-#define BLUE_BG "\033[44m"
-#define MAGENTA_BG "\033[45m"
-#define CYAN_BG "\033[46m"
-#define WHITE_BG "\033[47m"
+#define BG_BLACK "\x1B[48;5;232m"
+#define BG_DARK_GRAY "\x1B[48;5;237m"
+#define BG_GRAY "\x1B[48;5;244m"
+#define BG_LIGHT_GRAY "\x1B[48;5;249m"
+#define BG_WHITE "\x1B[48;5;255m"
+#define BG_DARK_RED "\x1B[48;5;124m"
+#define BG_RED "\x1B[48;5;196m"
+#define BG_DARK_ORANGE "\x1B[48;5;130m"
+#define BG_ORANGE "\x1B[48;5;208m"
+#define BG_DARK_YELLOW "\x1B[48;5;136m"
+#define BG_YELLOW "\x1B[48;5;226m"
+#define BG_LIME "\x1B[48;5;82m"
+#define BG_GREEN "\x1B[48;5;106m"
+#define BG_BLUE "\x1B[48;5;63m"
+#define BG_LIGHT_BLUE "\x1B[48;5;12m"
+#define BG_CYAN "\x1B[48;5;51m"
+#define BG_PINK "\x1B[48;5;219m"
+#define BG_MAGENTA "\x1B[48;5;199m"
+#define BG_PURPLE "\x1B[48;5;99m"
+#define BG_BROWN "\x1B[48;5;130m"
+
 
 // High intensity text colors
 #define BLACK_INTENSE_TEXT "\033[90m"
@@ -85,3 +100,8 @@
 #define CYAN_INTENSE_BG "\033[106m"
 #define WHITE_INTENSE_BG "\033[107m"
 
+#define SWAP "\033[7m" // Swap background and foreground colors
+
+// x => Color code between 0 and 255
+#define COLOR(x) "\x1B[38;5;"<<x<<"m"
+#define BG_COLOR(x) "\x1B[48;5;"<<x<<"m"

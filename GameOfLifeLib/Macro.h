@@ -56,14 +56,6 @@ namespace System
 
 namespace UserInteraction
 {
-
-	/// <summary>
-	/// Affiche une liste de string proprement avec l'index sur le coté
-	/// </summary>
-	/// <param name="_actionsArray"></param>
-	GAMEOFLIFELIB__API void DisplayMenu(const string* _options, const int _currentIndex, const u_int& _optionsCount, const string& _question);
-
-	GAMEOFLIFELIB__API int OpenMenu(const string* _options, const u_int& _optionsCount, const string& _question);
 	/// <summary>
 	/// Retourne l'input de l'utilisateur si il presse une touche
 	/// </summary>

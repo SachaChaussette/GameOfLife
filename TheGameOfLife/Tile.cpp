@@ -2,41 +2,87 @@
 
 Tile::Tile(Coordinate* _coordinate)
 {
+	state = CT_DEAD;
 	coordinate = _coordinate;
 	appearance = RESET;
-	weight = 0;
+	neighbourCount = 0;
 }
 
 Tile::Tile(const string& _appearance, const u_int& _weight)
 {
 	appearance = _appearance;
-	weight = _weight;
+	neighbourCount = _weight;
 }
 
-void Tile::UpdateWeight(const int _point)
+Tile::~Tile()
 {
-	weight += _point;
-	weight %= 4;
-	if (weight != 3 && appearance == RESET) return;
-	else if (weight == 3 && appearance == RESET)
-	{
-		appearance = WHITE_BG;
-		return;
-	}
-	else
-	{
-		appearance = RESET;
-	}
+	delete coordinate;
+}
+
+void Tile::SelfMutilate()
+{
+	if (!(neighbourCount == 3)) neighbourCount = 0;
 }
 
 void Tile::UpdateCell(const string& _appearance, const u_int& _weight)
 {
-	weight = _weight;
+	neighbourCount = _weight;
 	appearance = _appearance;
 	// TODO UPDATE LIST IN GAME
 }
 
-void Tile::Display() const
+/// <summary>
+/// Permet de changer le poids de la cell,
+/// Si le poid est de 3 alors la méthode renvoie
+/// sa coordonée
+/// Sinon elle renvoie nullptr
+/// </summary>
+/// <param name="_point"></param>
+/// <returns></returns>
+void Tile::UpdateNeighbourCount(const int _point)
 {
-	DISPLAY(appearance, false);
+	neighbourCount += _point;
+	neighbourCount %= 4;
+
+}
+
+CellState Tile::UpdateCellState()
+{
+	if (neighbourCount == 2) return state;
+	else if (neighbourCount == 3)
+	{
+		appearance = BG_WHITE;
+		state = CT_ALIVE;
+		return state;
+	}
+	else
+	{
+		appearance = RESET;
+		state = CT_DEAD;
+		return state;
+	}
+}
+
+void Tile::Display(const bool _debug) const
+{
+	if (_debug)
+	{
+		DISPLAY(to_string(neighbourCount) + " " + RESET, false);
+	}
+	else
+	{
+		DISPLAY(appearance + "  " + RESET, false)
+	}
+}
+
+string Tile::ToString(const bool _debug)
+{
+	if (_debug) return " " + to_string(neighbourCount);
+	return appearance + "  " + RESET;
+}
+
+void Tile::RemoveCell()
+{
+	neighbourCount = 0;
+	UpdateCellState();
 }

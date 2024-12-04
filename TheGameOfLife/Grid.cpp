@@ -14,6 +14,18 @@ Grid::Grid(const u_int& _length, const u_int& _width)
 	Setup();
 }
 
+Grid::~Grid()
+{
+	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
+	{
+		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
+		{
+			delete tiles[_rowIndex][_colIndex];
+		}
+
+	}
+}
+
 void Grid::Setup()
 {
 	// vector temporaire
@@ -32,9 +44,8 @@ void Grid::Setup()
 	}
 }
 
-void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect) const
+void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect, const bool _isDebug) const
 {
-	
 	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
 	{
 		if (_withGrid)
@@ -50,24 +61,38 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect)
 		
 		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
 		{
-			string _firstSymbol = "";
-			string _secondSymbol = "";
+			string _firstSymbol = " ";
+			string _secondSymbol = " ";
 
 			if (_withGrid) DISPLAY("|", false);
 
-			if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex)
+			if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex && _withGrid)
 			{
-				_firstSymbol = "[ ";
-				_secondSymbol = " ]";
+				_firstSymbol = "[";
+				_secondSymbol = "]";
 				DISPLAY(_firstSymbol, false);
-				tiles[_rowIndex][_colIndex]->Display();
+				tiles[_rowIndex][_colIndex]->Display(_isDebug);
 				DISPLAY(_secondSymbol, false);
+			}
+			else if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex)
+			{		
+				DISPLAY(BG_DARK_GRAY, false);
+				DISPLAY("  ", false);
+				DISPLAY(RESET, false);
+			}
+			else if(_withGrid)
+			{
+				DISPLAY(" ", false);
+				tiles[_rowIndex][_colIndex]->Display(_isDebug);
+				DISPLAY(" ", false);
 			}
 			else
 			{
-				DISPLAY("    ", false);
-				tiles[_rowIndex][_colIndex]->Display();
+				DISPLAY("", false);
+				tiles[_rowIndex][_colIndex]->Display(_isDebug);
+				DISPLAY("", false);
 			}
+
 		}
 		if (_withGrid) DISPLAY("|", true);
 	}
@@ -80,6 +105,42 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect)
 		}
 		DISPLAY("+", true);
 	}
+}
 
-	DISPLAY("\nPress Echap to Quit\t\tPress Enter to Select Cell", true);
+string Grid::ToString(const bool _withGrid) const
+{
+	string _text;
+
+	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
+	{
+		if (_withGrid)
+		{
+			_text += "+";
+			for (u_int _index = 0; _index < width; _index++)
+			{
+				_text += "----";
+				_text += "+";
+			}
+			_text += "\n";
+		}
+
+		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
+		{
+			if (_withGrid) _text += "| ";
+			_text += tiles[_rowIndex][_colIndex]->ToString(false);
+			_text += " ";
+		}
+		_text += _withGrid ? "|\n" : "\n";
+	}
+	if (_withGrid)
+	{
+		for (u_int _index = 0; _index < width; _index++)
+		{
+			_text += "+";
+			_text += "----";
+		}
+		_text += "+\n";
+	}
+
+	return _text;
 }
