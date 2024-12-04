@@ -88,9 +88,7 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect,
 			}
 			else
 			{
-				DISPLAY("", false);
 				tiles[_rowIndex][_colIndex]->Display(_isDebug);
-				DISPLAY("", false);
 			}
 
 		}

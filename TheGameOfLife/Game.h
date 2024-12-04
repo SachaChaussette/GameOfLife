@@ -28,9 +28,13 @@ enum ActionType
 class Game
 {
 	InputType inputType;
+
 	HWND hwnd;
 	HANDLE consoleHandle;
-	CONSOLE_CURSOR_INFO cursorInfo;
+	CONSOLE_CURSOR_INFO* cursorInfo;
+
+	CONSOLE_FONT_INFOEX* fontInfo;
+
 	Grid* grid;
 	vector<Coordinate*> coordinatesCellAlive;
 	u_int iterationCount;

@@ -6,8 +6,12 @@ Game::Game()
 {
 	hwnd = GetForegroundWindow();
 	consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	cursorInfo.dwSize = 100;
-	cursorInfo.bVisible = FALSE;
+	cursorInfo->dwSize = 100;
+	cursorInfo->bVisible = FALSE;
+
+	fontInfo->dwFontSize = { 10,10 };
+
+
 	grid = new Grid();
 	iterationCount = 0;
 }
@@ -16,8 +20,14 @@ Game::Game(const int _width, const int _length)
 {
 	hwnd = GetForegroundWindow();
 	consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	cursorInfo.dwSize = 100;
-	cursorInfo.bVisible = FALSE;
+	cursorInfo = new CONSOLE_CURSOR_INFO();
+	cursorInfo->dwSize = 100;
+	cursorInfo->bVisible = FALSE;
+
+	fontInfo = new CONSOLE_FONT_INFOEX();
+	fontInfo->cbSize = sizeof(CONSOLE_FONT_INFOEX);
+	fontInfo->dwFontSize = { 80,10 };
+
 	grid = new Grid(_width, _length);
 	iterationCount = 0;
 }
@@ -284,7 +294,9 @@ void Game::SelectionMenu()
 	int _index = 0;
 	do
 	{
+		SetCurrentConsoleFontEx(consoleHandle, TRUE, fontInfo);
 		SetConsoleCursorPosition(consoleHandle, { 0,0 });
+		SetConsoleCursorInfo(consoleHandle, cursorInfo);
 		_index = ChooseInputAndRetrieveIndex(_actionsCount - 1, _index);
 		DisplayMenu(_actions, _index, _actionsCount, "");
 		if (_index == -1) return;
