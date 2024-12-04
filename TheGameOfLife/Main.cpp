@@ -8,9 +8,8 @@ int main()
 {
 	Config();
 
-	Game _game = Game(); 
-	
-
+	Game _game = Game(50,50); 
+	_game.Gameloop();
 
 	return EXIT_SUCCESS;
 }
