@@ -19,16 +19,9 @@ Tile::~Tile()
 	delete coordinate;
 }
 
-void Tile::SelfMutilate()
+void Tile::ResetNeigbourCount()
 {
 	if (!(neighbourCount == 3)) neighbourCount = 0;
-}
-
-void Tile::UpdateCell(const string& _appearance, const u_int& _weight)
-{
-	neighbourCount = _weight;
-	appearance = _appearance;
-	// TODO UPDATE LIST IN GAME
 }
 
 /// <summary>
@@ -42,8 +35,6 @@ void Tile::UpdateCell(const string& _appearance, const u_int& _weight)
 void Tile::UpdateNeighbourCount(const int _point)
 {
 	neighbourCount += _point;
-	neighbourCount %= 4;
-
 }
 
 CellState Tile::UpdateCellState()

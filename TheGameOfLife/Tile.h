@@ -58,10 +58,9 @@ public:
 	~Tile();
 
 public:
-	void UpdateCell(const string& _appearance, const u_int& _weight);
 	void UpdateNeighbourCount(const int _point);
 	CellState UpdateCellState();
-	void SelfMutilate();
+	void ResetNeigbourCount();
 	void Display(const bool _debug) const;
 	void RemoveCell();
 	string ToString(const bool _debug);

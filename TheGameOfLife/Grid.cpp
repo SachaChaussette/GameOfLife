@@ -64,9 +64,14 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect,
 			string _firstSymbol = " ";
 			string _secondSymbol = " ";
 
-			if (_withGrid) DISPLAY("|", false);
+			if (_withGrid) 
+			{
+				DISPLAY("|  ", false);
+			}
+			DISPLAY("  ", false);
+			
 
-			if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex && _withGrid)
+			/*if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex && _withGrid)
 			{
 				_firstSymbol = "[";
 				_secondSymbol = "]";
@@ -89,7 +94,7 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect,
 			else
 			{
 				tiles[_rowIndex][_colIndex]->Display(_isDebug);
-			}
+			}*/
 
 		}
 		if (_withGrid) DISPLAY("|", true);

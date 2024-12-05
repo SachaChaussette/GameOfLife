@@ -33,37 +33,82 @@ class Game
 	HANDLE consoleHandle;
 	CONSOLE_CURSOR_INFO* cursorInfo;
 
-	CONSOLE_FONT_INFOEX* fontInfo;
-
 	Grid* grid;
 	vector<Coordinate*> coordinatesCellAlive;
+	vector<Coordinate*> oldCoordinatesCellAlive;
 	u_int iterationCount;
 public:
 	Game();
 	Game(const int _width, const int _length);
 	~Game();
 private:
+
+	template<template<typename, typename>class Container, typename Type, typename Allocator = Type>
+	void PushInVectorUnique(Container<Type, Allocator>& _container, Type _newItem)
+	{
+		bool _isIn = false;
+		const u_int& _containerSize = (u_int)_container.size();
+		for (u_int _index = 0; _index < _containerSize; _index++)
+		{
+			if (_container[_index] == _newItem)
+			{
+				_isIn = true;
+				break;
+			}
+		}
+		if (!_isIn) _container.push_back(_newItem);
+
+	}
+
+
+	/* ========== Gameplay ========== */
+
 	void NextIteration();
-	void PushCellAlive(Coordinate* _coordinate);
-	void PushCellAlive(const Coordinate& _coordinate);
+
+
+	/* ========== Algorithme ========== */
+
 	void CheckCellAlive();
 	void ResetWeightCell();
+	void AddPointToNeighbourCell();
+	void PushCoordinateCellAlive(Coordinate* _coordinate);
+	void PushCoordinateCellAlive(const Coordinate& _coordinate);
+	Coordinate ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coordinate& _direction);
+	bool IsAlreadyAlive(Coordinate _coordinateToCheck);
+
+	/* ========== Menus =========== */
 
 	pair<int, int> ChooseInputAndRetrieveCoords(const u_int& _optionsCount, pair<int, int> _pairOfIndexes);
-	int ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIndex);
 	void DisplayMenu(const string* _options, const int& _indexToSelect, const u_int& _optionsCount, const string& _question);
 	void SelectionMenu();
 	void GridMenu();
-	bool SelectionMenu(const int _menuIndex);
-	bool IsAlreadyAlive(const pair<int, int>& _pairOfIndexes);
+	int ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIndex);
+	bool ChooseMainMenu(const int _menuIndex);
 	
+	/* ========== Display ========== */
+
+	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false, const bool _isDebug = false);
 
 
 public:
-	void DisplayGrid(const bool _showGrid = false);
+
+	/* ========== Display ========== */
+
 	void DisplayInfos();
-	void AddPointToNeighbourCell();
+
+	/* ========== Gameplay ========== */
+
 	bool IsOver();
 	void Loop();
+
+
+	/* ========== Prefab ========== */
+
+	void InitGlider(const int _x = 0, const int _y = 0);
+	void InitBlock(const int _x = 0, const int _y = 0);
+	void InitGunPart1(const int _x = 0, const int _y = 0);
+	void InitGun(const int _x = 0, const int _y = 0);
+	void InitPrimordialSoup();
+	void InitNewAliveCell(const int _x, const int _y);
 };
 
