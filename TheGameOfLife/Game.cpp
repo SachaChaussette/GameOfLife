@@ -198,8 +198,8 @@ void Game::Gameloop()
 	SetConsoleCursorInfo(consoleHandle, &cursorInfo);
 	//InitNewAliveCell(0 , 1);
 	//InitGlider();
-	//InitGun(10 , 10);
-	InitPrimordialSoup();
+	InitGun(10 , 10);
+	//InitPrimordialSoup();
 	do
 	{
 		if (_generation % 50 == 1) system("cls");
@@ -298,6 +298,15 @@ void Game::InitPrimordialSoup()
 	{
 		InitNewAliveCell(Random::GetRandomNumberInRange(0, _x - 1), Random::GetRandomNumberInRange(0, _y - 1));
 	}
+}
+
+void Game::InitPatternByFile(const string& _path)
+{
+	//iostream _stream = iostream(_path);
+	//string _firstLine;
+	//string _word;
+	//getline(_stream, _firstLine);
+
 }
 
 /// <summary>

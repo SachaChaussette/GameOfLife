@@ -60,6 +60,7 @@ CellState Tile::UpdateCellState()
 		state = CT_DEAD;
 		return state;
 	}
+
 }
 
 void Tile::Display(const bool _debug) const
