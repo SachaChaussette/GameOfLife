@@ -39,7 +39,6 @@ void Game::NextIteration()
 {
 	iterationCount++;
 	AddPointToNeighbourCell();
-	CheckCellAlive();
 	DisplayCell(oldCoordinatesCellAlive, true);
 
 }
@@ -52,6 +51,7 @@ bool Game::IsOver()
 
 void Game::Loop()
 { 
+	InitGun(5, 5);
 	do
 	{
 		SelectionMenu();
@@ -63,28 +63,6 @@ void Game::Loop()
 
 
 /* ========== Algorithme ========== */
-
-void Game::CheckCellAlive()
-{
-	u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
-	{
-		Coordinate* _coordinateToCheck = coordinatesCellAlive[_index];
-		Tile* _tileToUpdate = grid->GetTile(_coordinateToCheck);
-
-		if (_tileToUpdate->GetNeighbourCount() == 0)
-		{
-			_tileToUpdate->UpdateCellState();
-		}
-		if (_tileToUpdate->GetCellState() == CT_DEAD)
-		{
-			_tileToUpdate->SetAppearance(RESET);
-			coordinatesCellAlive.erase(coordinatesCellAlive.begin() + _index);
-			_coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-			--_index;
-		}
-	}
-}
 
 void Game::ResetWeightCell()
 {
@@ -164,19 +142,28 @@ void Game::PushCoordinateCellAlive(const Coordinate& _coordinate)
 {
 	Tile* _tileToUpdate = grid->GetTile(_coordinate);
 	CellState _currentCellState = _tileToUpdate->UpdateCellState();
-
+	Coordinate* _coordinateToModify = _tileToUpdate->GetCoordinate();
 	if (_currentCellState == CT_ALIVE)
 	{
-		Coordinate* _coordinateToPush = _tileToUpdate->GetCoordinate();
-
 		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
-
 		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 		{
-			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
+			if (coordinatesCellAlive[_index] == _coordinateToModify) return;
 		}
-		coordinatesCellAlive.push_back(_coordinateToPush);
+		coordinatesCellAlive.push_back(_coordinateToModify);
 		sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end());
+	}
+	else
+	{
+		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+		{
+			if (coordinatesCellAlive[_index] == _coordinateToModify)
+			{
+				coordinatesCellAlive.erase(coordinatesCellAlive.begin() + _index);
+				return;
+			}
+		}
 	}
 }
 
@@ -234,8 +221,6 @@ pair<int, int> Game::ChooseInputAndRetrieveCoords(const int _optionsCount, pair<
 			else
 			{
 				_tempTile->RemoveCell();
-				CheckCellAlive();
-				DisplayCell(oldCoordinatesCellAlive,true);
 			}
 			
 			break;

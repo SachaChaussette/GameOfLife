@@ -71,7 +71,6 @@ private:
 
 	/* ========== Algorithme ========== */
 
-	void CheckCellAlive();
 	void ResetWeightCell();
 	void AddPointToNeighbourCell();
 	void PushCoordinateCellAlive(Coordinate* _coordinate);
