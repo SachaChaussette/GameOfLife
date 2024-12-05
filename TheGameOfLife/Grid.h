@@ -40,7 +40,7 @@ public:
 private:
 	void Setup();
 public:
-	void Display(const bool _withGrid, const pair<int, int>& _indexesToSelect, const bool _isDebug) const;
+	void Display(const bool _withGrid, const pair<int, int>& _indexesToSelect) const;
 	string ToString(const bool _withGrid = false) const;
 };
 

@@ -44,7 +44,7 @@ void Grid::Setup()
 	}
 }
 
-void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect, const bool _isDebug) const
+void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect) const
 {
 	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
 	{

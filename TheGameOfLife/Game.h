@@ -68,6 +68,8 @@ private:
 
 	void NextIteration();
 
+	void AutoIteration();
+
 
 	/* ========== Algorithme ========== */
 
@@ -76,6 +78,7 @@ private:
 	void PushCoordinateCellAlive(Coordinate* _coordinate);
 	void PushCoordinateCellAlive(const Coordinate& _coordinate);
 	Coordinate ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coordinate& _direction);
+	void CheckCellAlive();
 	bool IsAlreadyAlive(Coordinate _coordinateToCheck);
 
 	/* ========== Menus =========== */

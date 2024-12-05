@@ -39,8 +39,18 @@ void Game::NextIteration()
 {
 	iterationCount++;
 	AddPointToNeighbourCell();
+	CheckCellAlive();
 	DisplayCell(oldCoordinatesCellAlive, true);
 
+}
+
+void Game::AutoIteration()
+{
+	while (!_kbhit())
+	{
+		DisplayCell(coordinatesCellAlive);
+		NextIteration();
+	}
 }
 
 bool Game::IsOver()
@@ -50,8 +60,8 @@ bool Game::IsOver()
 }
 
 void Game::Loop()
-{ 
-	InitGun(5, 5);
+{
+	InitGun(5,5);
 	do
 	{
 		SelectionMenu();
@@ -184,6 +194,29 @@ Coordinate Game::ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coor
 	return { _newX, _newY };
 }
 
+void Game::CheckCellAlive()
+{
+	u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+	{
+		Coordinate* _coordinateToCheck = coordinatesCellAlive[_index];
+		Tile* _tileToUpdate = grid->GetTile(_coordinateToCheck);
+		if (_tileToUpdate->GetNeighbourCount() == 0)
+		{
+			_tileToUpdate->UpdateCellState();
+		}
+		if (_tileToUpdate->GetCellState() == CT_DEAD)
+		{
+			_tileToUpdate->SetAppearance(RESET);
+			coordinatesCellAlive.erase(coordinatesCellAlive.begin() + _index);
+			_coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+			--_index;
+			DisplayCell(oldCoordinatesCellAlive, true);
+
+		}
+	}
+}
+
 bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
 {
 	const u_int& _coordinatesCellAliveCount = static_cast<const u_int&>(coordinatesCellAlive.size());
@@ -245,7 +278,7 @@ pair<int, int> Game::ChooseInputAndRetrieveCoords(const int _optionsCount, pair<
 			NextIteration();
 			break;
 		case IT_F:
-			// TODO Auto Mode
+			AutoIteration();
 			break;
 		case IT_G:
 			return { -3,-3 };
@@ -316,7 +349,7 @@ void Game::GridMenu()
 	// TODO Update : ancienne coordonnée pour effacer les anciens curseur
 	pair<int, int> _oldPairOfIndexes;
 	// TODO Update : La grille se Display qu'une seule fois
-	grid->Display(isGrid, _pairOfIndexes, isDebug);
+	grid->Display(isGrid, _pairOfIndexes);
 	do
 	{
 		_oldPairOfIndexes = _pairOfIndexes;
@@ -332,6 +365,7 @@ void Game::GridMenu()
 
 		DisplayCell(coordinatesCellAlive, false);
 
+		CheckCellAlive();
 		//DisplayInfos();
 
 	} while (true);
@@ -561,6 +595,5 @@ void Game::DisplayInfos()
 
 	DISPLAY("\nPress 'A' to Previous Iteration\t\tPress 'E' to Next Iteration", true);
 	DISPLAY("\nPress 'F' to Auto Mode\t\t\tPress 'Enter' to Select Cell", true);
-	DISPLAY("\nPress 'G' to Enable/Disable Grid", true);
 	DISPLAY("\n\nPress 'Echap' to Quit\t", true);
 }
