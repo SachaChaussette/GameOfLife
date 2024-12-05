@@ -125,16 +125,28 @@ void Game::PushCoordinateCellAlive(const Coordinate& _coordinate)
 {
 	Tile* _tileToUpdate = grid->GetTile(_coordinate);
 	CellState _currentCellState = _tileToUpdate->UpdateCellState();
+	Coordinate* _currentCoordinate = _tileToUpdate->GetCoordinate();
 	if (_currentCellState == CT_ALIVE)
 	{
-		Coordinate* _coordinateToPush = _tileToUpdate->GetCoordinate();
 		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
 		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 		{
-			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
+			if (coordinatesCellAlive[_index] == _currentCoordinate) return;
 		}
-		coordinatesCellAlive.push_back(_coordinateToPush);
+		coordinatesCellAlive.push_back(_currentCoordinate);
 		sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end());
+	}
+	else
+	{
+		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
+		{
+			if (coordinatesCellAlive[_index] == _currentCoordinate)
+			{
+				coordinatesCellAlive.erase(coordinatesCellAlive.begin() + _index);
+				return;
+			}
+		}
 	}
 }
 
