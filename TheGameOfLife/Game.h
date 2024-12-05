@@ -37,6 +37,9 @@ class Game
 	vector<Coordinate*> coordinatesCellAlive;
 	vector<Coordinate*> oldCoordinatesCellAlive;
 	u_int iterationCount;
+
+	int isDebug;
+	int isGrid;
 public:
 	Game();
 	Game(const int _width, const int _length);
@@ -78,17 +81,17 @@ private:
 
 	/* ========== Menus =========== */
 
-	pair<int, int> ChooseInputAndRetrieveCoords(const u_int& _optionsCount, pair<int, int> _pairOfIndexes);
+	pair<int, int> ChooseInputAndRetrieveCoords(const int _optionsCount, pair<int, int> _pairOfIndexes);
 	void DisplayMenu(const string* _options, const int& _indexToSelect, const u_int& _optionsCount, const string& _question);
 	void SelectionMenu();
 	void GridMenu();
-	int ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIndex);
+	int ChooseInputAndRetrieveIndex(const int _optionsCount, int _currentIndex);
 	bool ChooseMainMenu(const int _menuIndex);
 	
 	/* ========== Display ========== */
 
-	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false, const bool _isDebug = false);
-
+	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false);
+	void DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes);
 
 public:
 

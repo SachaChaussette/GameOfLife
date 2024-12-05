@@ -29,6 +29,7 @@ Game::Game(const int _width, const int _length)
 Game::~Game()
 {
 	delete grid;
+	delete cursorInfo;
 }
 
 
@@ -39,7 +40,7 @@ void Game::NextIteration()
 	iterationCount++;
 	AddPointToNeighbourCell();
 	CheckCellAlive();
-	DisplayCell(oldCoordinatesCellAlive, true, 0);
+	DisplayCell(oldCoordinatesCellAlive, true);
 
 }
 
@@ -88,6 +89,7 @@ void Game::CheckCellAlive()
 void Game::ResetWeightCell()
 {
 	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
 		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
@@ -114,7 +116,9 @@ void Game::AddPointToNeighbourCell()
 	};
 
 	vector<Coordinate> _garbageCoord;
+
 	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
 		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
@@ -160,10 +164,13 @@ void Game::PushCoordinateCellAlive(const Coordinate& _coordinate)
 {
 	Tile* _tileToUpdate = grid->GetTile(_coordinate);
 	CellState _currentCellState = _tileToUpdate->UpdateCellState();
+
 	if (_currentCellState == CT_ALIVE)
 	{
 		Coordinate* _coordinateToPush = _tileToUpdate->GetCoordinate();
+
 		u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+
 		for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 		{
 			if (coordinatesCellAlive[_index] == _coordinateToPush) return;
@@ -192,7 +199,7 @@ Coordinate Game::ComputeNewCoordinate(Coordinate* _currentCoordinate, const Coor
 
 bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
 {
-	const u_int& _coordinatesCellAliveCount = coordinatesCellAlive.size();
+	const u_int& _coordinatesCellAliveCount = static_cast<const u_int&>(coordinatesCellAlive.size());
 	for (u_int _index = 0; _index < _coordinatesCellAliveCount; _index++)
 	{
 		if (_coordinateToCheck == coordinatesCellAlive[_index]) return true;
@@ -203,15 +210,17 @@ bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
 
 /* ========== Menus =========== */
 
-pair<int, int> Game::ChooseInputAndRetrieveCoords(const u_int& _optionsCount, pair<int, int> _pairOfIndexes)
+pair<int, int> Game::ChooseInputAndRetrieveCoords(const int _optionsCount, pair<int, int> _pairOfIndexes)
 {
 	if (_kbhit())
 	{
 		// Attendre une touche
 		u_int _input = 0;
 		_input = _getch();
+
 		Coordinate* _coordinateToTest;
 		Tile* _tempTile;
+
 		switch (_input)
 		{
 		case IT_ENTER: // Entrer
@@ -224,9 +233,9 @@ pair<int, int> Game::ChooseInputAndRetrieveCoords(const u_int& _optionsCount, pa
 			}
 			else
 			{
-				CheckCellAlive();
 				_tempTile->RemoveCell();
 				CheckCellAlive();
+				DisplayCell(oldCoordinatesCellAlive,true);
 			}
 			
 			break;
@@ -306,8 +315,10 @@ void Game::SelectionMenu()
 	{
 		SetConsoleCursorPosition(consoleHandle, { 0,0 });
 		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+
 		_index = ChooseInputAndRetrieveIndex(_actionsCount - 1, _index);
 		DisplayMenu(_actions, _index, _actionsCount, "");
+
 		if (_index == -1) return;
 		
 	} while (true);
@@ -317,11 +328,13 @@ void Game::SelectionMenu()
 void Game::GridMenu()
 {
 	pair<int, int> _pairOfIndexes = make_pair(0, 0);
-	int _isDebug = 0;
-	int _isGrid = 0;
-	grid->Display(_isGrid, _pairOfIndexes,false);
+	// TODO Update : ancienne coordonnée pour effacer les anciens curseur
+	pair<int, int> _oldPairOfIndexes;
+	// TODO Update : La grille se Display qu'une seule fois
+	grid->Display(isGrid, _pairOfIndexes, isDebug);
 	do
 	{
+		_oldPairOfIndexes = _pairOfIndexes;
 		
 		SetConsoleCursorPosition(consoleHandle, { 0,0 });
 		_pairOfIndexes = ChooseInputAndRetrieveCoords(grid->GetLength(), _pairOfIndexes);
@@ -329,28 +342,17 @@ void Game::GridMenu()
 		// Quitter
 		if (_pairOfIndexes.first == -1 && _pairOfIndexes.second == -1) return;
 
-		// Toggle Debug
-		if (_pairOfIndexes.first == -2 && _pairOfIndexes.second == -2)
-		{
-			_pairOfIndexes = { 0,0 };
-			++_isDebug %= 2;
-		}
-		// Toggle Grid
-		if (_pairOfIndexes.first == -3 && _pairOfIndexes.second == -3)
-		{
-			_pairOfIndexes = { 0,0 };
-			++_isGrid %= 2;
-		}
-		DisplayCell(coordinatesCellAlive, false, 1);
-		DisplayInfos();
+		// TODO Update : Le curseur s'affiche à part de la grid
+		DisplayCursor(_pairOfIndexes, _oldPairOfIndexes);
 
+		DisplayCell(coordinatesCellAlive, false);
 
-
+		//DisplayInfos();
 
 	} while (true);
 }
 
-int Game::ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIndex)
+int Game::ChooseInputAndRetrieveIndex(const int _optionsCount, int _currentIndex)
 {
 	bool _wantToReturn = false;
 	if (_kbhit())
@@ -370,6 +372,14 @@ int Game::ChooseInputAndRetrieveIndex(const u_int& _optionsCount, int _currentIn
 			break;
 		case IT_RIGHT:
 			_currentIndex = (_currentIndex >= _optionsCount ? 0 : _currentIndex + 1);
+			break;
+		case IT_G:
+			// Toggle Grid
+			++isGrid %= 2;
+			break;
+		case IT_DEBUG:
+			// Toggle Debug
+			++isDebug %= 2;
 			break;
 		default:
 			break;
@@ -497,13 +507,20 @@ void Game::InitNewAliveCell(const int _x, const int _y)
 
 /* ========== Display ========== */
  
-void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay, const bool _isDebug)
+void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay)
 {
 	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
 		Coordinate* _coordinate = _cellCoordinates[_index];
-		SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_coordinate->x * 2), static_cast<short>(_coordinate->y) });
+		if (isGrid)
+		{
+			SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_coordinate->x * 5 + 2), static_cast<short>(_coordinate->y * 2+ 1) });
+		}
+		else
+		{
+			SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_coordinate->x * 2), static_cast<short>(_coordinate->y) });
+		}
 		if (_unDisplay)
 		{
 			if (binary_search(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), _cellCoordinates[_index])) continue;
@@ -511,10 +528,46 @@ void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _
 		}
 		else
 		{
-			grid->GetTile(_coordinate)->Display(_isDebug);
+			grid->GetTile(_coordinate)->Display(isDebug);
 		}
 	}
 	if (!_unDisplay) Sleep(100);
+}
+
+void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes)
+{
+	for (int _rowIndex = 0; _rowIndex < int(grid->GetLength()); _rowIndex++)
+	{
+		for (int _colIndex = 0; _colIndex < int(grid->GetWidth()); _colIndex++)
+		{
+			if (_pairOfIndexes.first == _colIndex && _pairOfIndexes.second == _rowIndex && isGrid)
+			{
+				
+				SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_pairOfIndexes.second * 5 + 1), static_cast<short>(_pairOfIndexes.first * 2 + 1)});
+				DISPLAY("[  ]", false);
+				if (_pairOfIndexes != _oldPairOfIndexes)
+				{
+					SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_oldPairOfIndexes.second * 5 + 1), static_cast<short>(_oldPairOfIndexes.first * 2 + 1) });
+					DISPLAY("    ", false);
+				}
+				return;
+				
+			}
+			else if (_pairOfIndexes.first == _colIndex && _pairOfIndexes.second == _rowIndex)
+			{
+				DISPLAY(BG_DARK_GRAY, false);
+				SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_pairOfIndexes.second * 2), static_cast<short>(_pairOfIndexes.first) });
+				DISPLAY("  ", false);
+				DISPLAY(RESET, false);
+				if (_pairOfIndexes != _oldPairOfIndexes)
+				{
+					SetConsoleCursorPosition(consoleHandle, { static_cast<short>(_oldPairOfIndexes.second * 2), static_cast<short>(_oldPairOfIndexes.first) });
+					DISPLAY("  ", false);
+				}
+				return;
+			}
+		}
+	}
 }
 
 void Game::DisplayInfos()

@@ -61,42 +61,13 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect,
 		
 		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
 		{
-			string _firstSymbol = " ";
-			string _secondSymbol = " ";
-
 			if (_withGrid) 
 			{
 				DISPLAY("|  ", false);
 			}
 			DISPLAY("  ", false);
-			
-
-			/*if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex && _withGrid)
-			{
-				_firstSymbol = "[";
-				_secondSymbol = "]";
-				DISPLAY(_firstSymbol, false);
-				tiles[_rowIndex][_colIndex]->Display(_isDebug);
-				DISPLAY(_secondSymbol, false);
-			}
-			else if (_indexesToSelect.first == _colIndex && _indexesToSelect.second == _rowIndex)
-			{		
-				DISPLAY(BG_DARK_GRAY, false);
-				DISPLAY("  ", false);
-				DISPLAY(RESET, false);
-			}
-			else if(_withGrid)
-			{
-				DISPLAY(" ", false);
-				tiles[_rowIndex][_colIndex]->Display(_isDebug);
-				DISPLAY(" ", false);
-			}
-			else
-			{
-				tiles[_rowIndex][_colIndex]->Display(_isDebug);
-			}*/
-
 		}
+		// TODO UPDATE : Plus de curseur dans le Display
 		if (_withGrid) DISPLAY("|", true);
 	}
 	if (_withGrid)
