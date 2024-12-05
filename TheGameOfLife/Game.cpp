@@ -61,7 +61,8 @@ bool Game::IsOver()
 
 void Game::Loop()
 {
-	InitGun(5,5);
+	InitPrimordialSoup();
+	//InitGun(5,5);
 	do
 	{
 		SelectionMenu();
@@ -211,10 +212,9 @@ void Game::CheckCellAlive()
 			coordinatesCellAlive.erase(coordinatesCellAlive.begin() + _index);
 			_coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
 			--_index;
-			DisplayCell(oldCoordinatesCellAlive, true);
-
 		}
 	}
+	DisplayCell(oldCoordinatesCellAlive, true);
 }
 
 bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
@@ -299,7 +299,6 @@ void Game::DisplayMenu(const string* _options, const int& _indexToSelect, const 
 	string _firstSymbol = "[";
 	string _secondSymbol = "]";
 
-	DISPLAY("======== Actions ========", true);
 	for (u_int _index = 0; _index < _optionsCount; _index++)
 	{
 		if (_indexToSelect != _index)
@@ -316,14 +315,16 @@ void Game::DisplayMenu(const string* _options, const int& _indexToSelect, const 
 		DISPLAY(_firstSymbol << _options[_index] << _secondSymbol << "\t", false);
 	}
 	DISPLAY("\n=========================", true);
+	DISPLAY("Made By VT And Sacha=========================", true);
+
 }
 
 void Game::SelectionMenu()
 {
 	string _actions[2]
 	{
-		"Choisir une Cellule à Modifier",
-		"Quitter"
+		"Play",
+		"Quit"
 	};
 	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
 
@@ -504,10 +505,10 @@ void Game::InitPrimordialSoup()
 {
 	const int _x = grid->GetLength();
 	const int _y = grid->GetLength();
-	const u_int& _numberOfNewCell = (_x * _y) / 5;
+	const u_int& _numberOfNewCell = (_x * _y) / 2;
 	for (u_int _index = 0; _index < _numberOfNewCell; _index++)
 	{
-		InitNewAliveCell(Random::GetRandomNumberInRange(0, _x - 1), Random::GetRandomNumberInRange(0, _y - 1));
+		InitNewAliveCell(Random::GetRandomNumberInRange(_x / 5, _x - _x / 5), Random::GetRandomNumberInRange(_y / 5, _y - _y / 5));
 	}
 }
 
@@ -526,6 +527,7 @@ void Game::InitNewAliveCell(const int _x, const int _y)
 
 /* ========== Display ========== */
  
+// TODO Affichage Milieu Ecran
 void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay)
 {
 	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();
