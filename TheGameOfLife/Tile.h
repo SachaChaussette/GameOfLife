@@ -16,10 +16,11 @@ class Tile
 	string appearance;
 	u_int neighbourCount;
 public:
-	void SetTile(Coordinate* _coordinate)
+	inline void SetTile(Coordinate* _coordinate)
 	{
 		coordinate = _coordinate;
 	}
+
 	inline void SetAppearance(const string& _color)
 	{
 		appearance = _color;

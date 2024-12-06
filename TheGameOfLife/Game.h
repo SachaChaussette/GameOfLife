@@ -68,7 +68,7 @@ public:
 private:
 
 	template<template<typename, typename>class Container, typename Type, typename Allocator = Type>
-	void PushInVectorUnique(Container<Type, Allocator>& _container, Type _newItem)
+	void PushInVectorUnique(Container<Type, Allocator>& _container, const Type& _newItem)
 	{
 		bool _isIn = false;
 		const u_int& _containerSize = (u_int)_container.size();
@@ -119,9 +119,9 @@ private:
 	
 	/* ========== Display ========== */
 
-	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false);
-	void DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes);
-	void DisplayInfos();
+	void DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay = false) const;
+	void DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes) const;
+	void DisplayInfos() const;
 
 public:
 	/* ========== Gameplay ========== */

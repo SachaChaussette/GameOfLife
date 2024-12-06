@@ -140,7 +140,7 @@ void Game::Loop()
 
 void Game::ResetWeightCell()
 {
-	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	const u_int& _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
 
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
@@ -169,7 +169,7 @@ void Game::AddPointToNeighbourCell()
 
 	vector<Coordinate> _garbageCoord;
 
-	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
+	const u_int& _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
 
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
@@ -717,7 +717,7 @@ void Game::InitPrimordialSoup()
 
 /* ========== Display ========== */
  
-void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay)
+void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay) const
 {
 	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
@@ -744,7 +744,7 @@ void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _
 	if (!_unDisplay) Sleep(speed);
 }
 
-void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes)
+void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes) const
 {
 	for (int _rowIndex = 0; _rowIndex < int(grid->GetLength()); _rowIndex++)
 	{
@@ -780,7 +780,7 @@ void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, i
 	}
 }
 
-void Game::DisplayInfos()
+void Game::DisplayInfos() const
 {
 	for (u_int _index = 0; _index < 12; _index++)
 	{
