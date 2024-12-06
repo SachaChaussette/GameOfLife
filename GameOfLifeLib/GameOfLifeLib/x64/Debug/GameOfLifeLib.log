@@ -1,6 +1,16 @@
 ﻿  pch.cpp
   dllmain.cpp
   Macro.cpp
+C:\Users\Sacha\Documents\GitHub\GameOfLife\GameOfLifeLib\Macro.h(258,11): warning C4251: 'Stream::StreamSystem::stream': 'std::basic_fstream<char,std::char_traits<char>>' needs to have dll-interface to be used by clients of 'Stream::StreamSystem'
+  (compiling source file '/Macro.cpp')
+      D:\Program Files\Visual Studio 2022\VC\Tools\MSVC\14.41.34120\include\fstream(330,7):
+      see declaration of 'std::basic_fstream<char,std::char_traits<char>>'
+  
+C:\Users\Sacha\Documents\GitHub\GameOfLife\GameOfLifeLib\Macro.h(260,10): warning C4251: 'Stream::StreamSystem::filePath': 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' needs to have dll-interface to be used by clients of 'Stream::StreamSystem'
+  (compiling source file '/Macro.cpp')
+      D:\Program Files\Visual Studio 2022\VC\Tools\MSVC\14.41.34120\include\xstring(527,7):
+      see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+  
   Generating Code...
-     Creating library D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.lib and object D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.exp
-  GameOfLifeLib.vcxproj -> D:\COURS 24-25\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.dll
+     Creating library C:\Users\Sacha\Documents\GitHub\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.lib and object C:\Users\Sacha\Documents\GitHub\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.exp
+  GameOfLifeLib.vcxproj -> C:\Users\Sacha\Documents\GitHub\GameOfLife\GameOfLifeLib\x64\Debug\GameOfLifeLib.dll

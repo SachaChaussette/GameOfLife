@@ -59,7 +59,7 @@ public:
 
 public:
 	void UpdateNeighbourCount(const int _point);
-	CellState UpdateCellState();
+	CellState UpdateCellState(/*const int _appearanceType*/);
 	void ResetNeigbourCount();
 	void Display(const bool _debug) const;
 	void RemoveCell();

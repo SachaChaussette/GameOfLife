@@ -147,6 +147,10 @@
     <ClInclude Include="Tile.h" />
     <ClInclude Include="UserInteraction.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="MainMenuAscii_En.txt" />
+    <Text Include="MainMenuAscii_Fr.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

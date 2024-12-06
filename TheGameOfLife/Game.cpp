@@ -2,6 +2,8 @@
 #include "UserInteraction.h"
 #include "windows.h"
 
+using namespace Stream;
+
 Game::Game()
 {
 	hwnd = GetForegroundWindow();
@@ -53,23 +55,15 @@ void Game::AutoIteration()
 	}
 }
 
-bool Game::IsOver()
-{
-	// TODO ISOVER
-	return true;
-}
-
 void Game::Loop()
 {
+
 	InitPrimordialSoup();
 	//InitGun(5,5);
 	do
 	{
-		SelectionMenu();
-	} while (!IsOver());
-	
-	
-	// TODO LOOP
+		MainMenu();
+	} while (true);
 }
 
 
@@ -314,12 +308,9 @@ void Game::DisplayMenu(const string* _options, const int& _indexToSelect, const 
 
 		DISPLAY(_firstSymbol << _options[_index] << _secondSymbol << "\t", false);
 	}
-	DISPLAY("\n=========================", true);
-	DISPLAY("Made By VT And Sacha=========================", true);
-
 }
 
-void Game::SelectionMenu()
+void Game::MainMenu()
 {
 	string _actions[2]
 	{
@@ -329,14 +320,22 @@ void Game::SelectionMenu()
 	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
 
 	int _index = 0;
-	
+
 	do
 	{
 		SetConsoleCursorPosition(consoleHandle, { 0,0 });
 		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+		StreamSystem _it;
+		if (isFr) _it = StreamSystem("", "MainMenuAscii_Fr", "txt", ios_base::in);
+		else _it = StreamSystem("", "MainMenuAscii_En", "txt", ios_base::in);
+		_it.DisplayByRow(60, 0);
 
-		_index = ChooseInputAndRetrieveIndex(_actionsCount - 1, _index);
+		_index = ChooseInputFromMainMenuAndRetrieveIndex(_actionsCount - 1, _index);
+		SetConsoleCursorPosition(consoleHandle, { 100,60 });
 		DisplayMenu(_actions, _index, _actionsCount, "");
+
+		DISPLAY("\n===================", true);
+		DISPLAY("Made By VT And Sacha", true);
 
 		if (_index == -1) return;
 		
@@ -344,12 +343,39 @@ void Game::SelectionMenu()
 
 }
 
+void Game::OptionMenu()
+{
+	string _actions[5]
+	{
+		"Empty Grid",
+		"Priomordial Soup",
+		"Glider",
+		"Glider Gun",
+		"Block"
+	};
+	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
+
+	int _index = 0;
+
+	do
+	{
+		SetConsoleCursorPosition(consoleHandle, { 100,20 });
+		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+
+		_index = ChooseInputFromOptionMenuAndRetrieveIndex(_actionsCount - 1, _index);
+		DisplayMenu(_actions, _index, _actionsCount, "");
+
+		if (_index == -1) return;
+
+	} while (true);
+
+}
+
 void Game::GridMenu()
 {
 	pair<int, int> _pairOfIndexes = make_pair(0, 0);
-	// TODO Update : ancienne coordonnée pour effacer les anciens curseur
 	pair<int, int> _oldPairOfIndexes;
-	// TODO Update : La grille se Display qu'une seule fois
+
 	grid->Display(isGrid, _pairOfIndexes);
 	do
 	{
@@ -361,7 +387,6 @@ void Game::GridMenu()
 		// Quitter
 		if (_pairOfIndexes.first == -1 && _pairOfIndexes.second == -1) return;
 
-		// TODO Update : Le curseur s'affiche à part de la grid
 		DisplayCursor(_pairOfIndexes, _oldPairOfIndexes);
 
 		DisplayCell(coordinatesCellAlive, false);
@@ -372,7 +397,36 @@ void Game::GridMenu()
 	} while (true);
 }
 
-int Game::ChooseInputAndRetrieveIndex(const int _optionsCount, int _currentIndex)
+int Game::ChooseInputFromMainMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex)
+{
+	bool _wantToReturn = false;
+	if (_kbhit())
+	{
+		// Attendre une touche
+		u_int _input = 0;
+		_input = _getch();
+
+		switch (_input)
+		{
+		case IT_ENTER: // Entrer
+			_wantToReturn = ChooseMainMenu(_currentIndex);
+			if (_wantToReturn) return -1;
+			break;
+		case IT_LEFT:
+			_currentIndex = (_currentIndex <= 0 ? _optionsCount : _currentIndex - 1);
+			break;
+		case IT_RIGHT:
+			_currentIndex = (_currentIndex >= _optionsCount ? 0 : _currentIndex + 1);
+			break;
+		default:
+			break;
+		}
+	}
+	return _currentIndex;
+
+}
+
+int Game::ChooseInputFromOptionMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex)
 {
 	bool _wantToReturn = false;
 	if (_kbhit())
@@ -410,6 +464,21 @@ int Game::ChooseInputAndRetrieveIndex(const int _optionsCount, int _currentIndex
 }
 
 bool Game::ChooseMainMenu(const int _menuIndex)
+{
+	switch (_menuIndex)
+	{
+	case AT_GRID:
+		system("cls");
+		OptionMenu();
+		system("cls");
+		break;
+	case AT_QUIT:
+		return true;
+	}
+	return false;
+}
+
+bool Game::ChooseOptionMenu(const int _menuIndex)
 {
 	switch (_menuIndex)
 	{
@@ -527,7 +596,6 @@ void Game::InitNewAliveCell(const int _x, const int _y)
 
 /* ========== Display ========== */
  
-// TODO Affichage Milieu Ecran
 void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _unDisplay)
 {
 	u_int _coordinatesCellAliveSize = (u_int)_cellCoordinates.size();

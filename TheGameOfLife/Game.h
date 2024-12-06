@@ -25,6 +25,18 @@ enum ActionType
 	AT_QUIT,
 };
 
+
+// TODO COLOR 
+enum ColorType
+{
+	CT_NORMAL = 0,
+	CT_GRAY,
+	CT_GREEN,
+	CT_RED,
+
+	CT_RESET,
+};
+
 class Game
 {
 	InputType inputType;
@@ -40,6 +52,10 @@ class Game
 
 	int isDebug;
 	int isGrid;
+
+	int isFr;
+	
+	ColorType colorType;
 public:
 	Game();
 	Game(const int _width, const int _length);
@@ -85,10 +101,13 @@ private:
 
 	pair<int, int> ChooseInputAndRetrieveCoords(const int _optionsCount, pair<int, int> _pairOfIndexes);
 	void DisplayMenu(const string* _options, const int& _indexToSelect, const u_int& _optionsCount, const string& _question);
-	void SelectionMenu();
+	void MainMenu();
+	void OptionMenu();
 	void GridMenu();
-	int ChooseInputAndRetrieveIndex(const int _optionsCount, int _currentIndex);
+	int ChooseInputFromMainMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex);
+	int ChooseInputFromOptionMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex);
 	bool ChooseMainMenu(const int _menuIndex);
+	bool ChooseOptionMenu(const int _menuIndex);
 	
 	/* ========== Display ========== */
 

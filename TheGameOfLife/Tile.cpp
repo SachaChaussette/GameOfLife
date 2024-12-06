@@ -37,12 +37,34 @@ void Tile::UpdateNeighbourCount(const int _point)
 	neighbourCount += _point;
 }
 
-CellState Tile::UpdateCellState()
+CellState Tile::UpdateCellState(/*const int _appearanceType*/)
 {
 	if (neighbourCount == 2) return state;
 	else if (neighbourCount == 3)
 	{
+		/*switch (_appearanceType)
+		{
+		case 0:
+			appearance = BG_WHITE;
+			break;
+		case 1:
+			appearance = BG_DARK_GRAY;
+			break;
+		case 2:
+			appearance = BG_GREEN;
+			break;
+		case 3:
+			appearance = BG_RED;
+			break;
+		case 4:
+			appearance = RESET;
+			break;
+		default:
+			break;
+		}*/
+		
 		appearance = BG_WHITE;
+
 		state = CT_ALIVE;
 		return state;
 	}
