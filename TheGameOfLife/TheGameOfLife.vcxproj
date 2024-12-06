@@ -134,7 +134,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="UserInteraction.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Coordinate.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Grid.h" />
+    <ClInclude Include="Tile.h" />
+    <ClInclude Include="UserInteraction.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="MainMenuAscii_En.txt" />
+    <Text Include="MainMenuAscii_Fr.txt" />
+    <Text Include="Pattern\Block.txt" />
+    <Text Include="Pattern\Glider.txt" />
+    <Text Include="Pattern\Gun.txt" />
+    <Text Include="Pattern\PrefabNames.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
