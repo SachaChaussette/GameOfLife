@@ -62,15 +62,15 @@ void Game::Clear()
 	CheckCellAlive();
 }
 
-void Game::InitPrefabByFile(const string& _filePath, const int _posX, const int _posY)
+void Game::InitPrefabByFile(const string& _prefabName, const int _posX, const int _posY)
 {
 	string _paternName;
 	u_int _length;
 	u_int _width;
-	ifstream _stream = ifstream(_filePath);
+	ifstream _stream = ifstream("Pattern\\" + _prefabName + ".txt");
 	if (!_stream)
 	{
-		cerr << "ERROR => the file : " << _filePath << " doesn't exist !" << endl;
+		cerr << "ERROR => the file : " << _prefabName << " doesn't exist !" << endl;
 		return;
 	}
 	_stream >> _paternName;
@@ -78,7 +78,7 @@ void Game::InitPrefabByFile(const string& _filePath, const int _posX, const int 
 	_stream >> _width;
 	delete grid;
 	grid = new Grid(_length, _width);
-
+	coordinatesCellAlive = oldCoordinatesCellAlive = vector<Coordinate*>();
 	int _lineIndex = -1;
 	string _line;
 	while (getline(_stream, _line))
@@ -106,8 +106,11 @@ bool Game::IsOver()
 
 void Game::Loop()
 {
-	InitGun(5, 5);
-	SavePrefab("Test");
+	InitBlock();
+	SavePrefab("Block");
+	InitGlider();
+	InitPrefabByFile("Block"); 
+
 	do
 	{
 		SelectionMenu();
@@ -479,7 +482,7 @@ bool Game::ChooseMainMenu(const int _menuIndex)
 void Game::SavePrefab(const string& _name)
 {
 	fstream _ofstream = fstream("Pattern\\PrefabNames.txt", ios::app);
-	_ofstream << _name;
+	_ofstream << _name+ "\n";
 
 	fstream _newFile = fstream("Pattern\\" + _name + ".txt", ios::app);
 
@@ -487,29 +490,44 @@ void Game::SavePrefab(const string& _name)
 	_parameter += _name + " " + to_string(grid->GetLength()) + " " + to_string(grid->GetWidth());
 	_newFile << _parameter + "\n";
 
-	auto glambda = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->y < _secondCoordinate->y; };
-	sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), glambda);
+	auto _yPriority = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->y < _secondCoordinate->y; };
+	sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), _yPriority);
 
-	int _currentLineAxis =  0;
-	int _currentLineAxisCount = 0;
-	int _lowest = coordinatesCellAlive[_currentLineAxis]->y;
-	do
-	{
-		_currentLineAxis++;
+	const u_int _lastY = static_cast<int>(coordinatesCellAlive[coordinatesCellAlive.size() - 1]->y);
+	const u_int _coordinateCellAliveSize = static_cast<int>(coordinatesCellAlive.size());
 
-	} while (coordinatesCellAlive[_currentLineAxis - 1]->y == coordinatesCellAlive[_currentLineAxis]->y);
-	sort(coordinatesCellAlive.begin() + _currentLineAxis, coordinatesCellAlive.begin() + _currentLineAxis + _currentLineAxisCount);
-	string _line;
-	int _start0 = 0;
-	int _limitOf0 = coordinatesCellAlive[_currentLineAxis]->x;
-	for (u_int _inedx = _start0; _inedx < _limitOf0; _inedx++)
+	int _occurence = 0;
+	int _indexLine = 0;
+	for (u_int _inedx = 0; _inedx < _lastY + 1; _inedx++)
 	{
-		_line += "0";
+		do
+		{
+			++_occurence;
+		} while ((_indexLine + _occurence) != _coordinateCellAliveSize && (coordinatesCellAlive[_indexLine]->y == coordinatesCellAlive[_indexLine + _occurence]->y));
+
+		auto _xPriority = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->x < _secondCoordinate->x; };
+		sort(coordinatesCellAlive.begin() + _indexLine, coordinatesCellAlive.begin() + _indexLine + _occurence, _xPriority);
+
+		string _line;
+		
+		int _start0 = 0;
+		for (int _index = _indexLine; _index < _indexLine + _occurence; _index++)
+		{
+			int _limitOf0 = coordinatesCellAlive[_index]->x;
+			for (int _inedx = _start0; _inedx < _limitOf0 - 1; _inedx++)
+			{
+				_line += "0";
+			}
+			_line += "1";
+			_start0 = coordinatesCellAlive[_index]->x;
+
+		}
+		_newFile << _line + "\n";
+
+		_indexLine += _occurence;
+		_occurence = 0;
+
 	}
-	_line += "1";
-	_newFile << _line;
-	_start0 = coordinatesCellAlive[_currentLineAxis]->x;
-	
 
 }
 
