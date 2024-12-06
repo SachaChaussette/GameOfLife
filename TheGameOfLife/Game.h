@@ -36,7 +36,7 @@ class Game
 	Grid* grid;
 	vector<Coordinate*> coordinatesCellAlive;
 	vector<Coordinate*> oldCoordinatesCellAlive;
-	u_int iterationCount;
+	u_int generation;
 
 	int isDebug;
 	int isGrid;
@@ -67,9 +67,9 @@ private:
 	/* ========== Gameplay ========== */
 
 	void NextIteration();
-
 	void AutoIteration();
-
+	void Clear();
+	void InitPrefabByFile(const string& _filePath, const int _posX = 0, const int _posY = 0);
 
 	/* ========== Algorithme ========== */
 
@@ -109,6 +109,7 @@ public:
 
 	/* ========== Prefab ========== */
 
+	void SavePrefab(const string& _name);
 	void InitGlider(const int _x = 0, const int _y = 0);
 	void InitBlock(const int _x = 0, const int _y = 0);
 	void InitGunPart1(const int _x = 0, const int _y = 0);

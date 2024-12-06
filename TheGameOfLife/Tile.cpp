@@ -25,13 +25,8 @@ void Tile::ResetNeigbourCount()
 }
 
 /// <summary>
-/// Permet de changer le poids de la cell,
-/// Si le poid est de 3 alors la méthode renvoie
-/// sa coordonée
-/// Sinon elle renvoie nullptr
-/// </summary>
-/// <param name="_point"></param>
-/// <returns></returns>
+/// Update le neighbour count 
+/// <summary>
 void Tile::UpdateNeighbourCount(const int _point)
 {
 	neighbourCount += _point;

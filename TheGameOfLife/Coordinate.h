@@ -16,11 +16,12 @@ struct Coordinate
 
 	bool operator==(Coordinate _other)
 	{
-		return _other.x == x && _other.y == y;
+		return _other.y == y && _other.x == x;
 	}
 
 	bool operator==(Coordinate* _other)
 	{
-		return _other->x == x && _other->y == y;
+		return _other->y == y && _other->x == x;
 	}
+
 };

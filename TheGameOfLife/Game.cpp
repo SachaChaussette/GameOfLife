@@ -11,7 +11,7 @@ Game::Game()
 
 
 	grid = new Grid();
-	iterationCount = 0;
+	generation = 0;
 }
 
 Game::Game(const int _width, const int _length)
@@ -23,7 +23,7 @@ Game::Game(const int _width, const int _length)
 	cursorInfo->bVisible = FALSE;
 
 	grid = new Grid(_width, _length);
-	iterationCount = 0;
+	generation = 0;
 }
 
 Game::~Game()
@@ -37,7 +37,7 @@ Game::~Game()
 
 void Game::NextIteration()
 {
-	iterationCount++;
+	generation++;
 	AddPointToNeighbourCell();
 	CheckCellAlive();
 	DisplayCell(oldCoordinatesCellAlive, true);
@@ -53,6 +53,51 @@ void Game::AutoIteration()
 	}
 }
 
+void Game::Clear()
+{
+	for (Coordinate* _element : coordinatesCellAlive)
+	{
+		grid->GetTile(_element)->RemoveCell();
+	}
+	CheckCellAlive();
+}
+
+void Game::InitPrefabByFile(const string& _filePath, const int _posX, const int _posY)
+{
+	string _paternName;
+	u_int _length;
+	u_int _width;
+	ifstream _stream = ifstream(_filePath);
+	if (!_stream)
+	{
+		cerr << "ERROR => the file : " << _filePath << " doesn't exist !" << endl;
+		return;
+	}
+	_stream >> _paternName;
+	_stream >> _length;
+	_stream >> _width;
+	delete grid;
+	grid = new Grid(_length, _width);
+
+	int _lineIndex = -1;
+	string _line;
+	while (getline(_stream, _line))
+	{
+		if (_lineIndex != -1)
+		{
+			u_int _lineSize = static_cast<u_int>(_line.size());
+			int _binary;
+			for (u_int _index = 0; _index < _lineSize; _index++)
+			{
+				_binary = _line[_index] - '0';
+				if (_binary == 1)InitNewAliveCell(_index, _lineIndex);
+			}
+		}
+		++_lineIndex;
+	}
+}
+
+
 bool Game::IsOver()
 {
 	// TODO ISOVER
@@ -61,7 +106,8 @@ bool Game::IsOver()
 
 void Game::Loop()
 {
-	InitGun(5,5);
+	InitGun(5, 5);
+	SavePrefab("Test");
 	do
 	{
 		SelectionMenu();
@@ -107,6 +153,7 @@ void Game::AddPointToNeighbourCell()
 
 	const u_int _coordinatesCellAliveSize = (u_int)coordinatesCellAlive.size();
 
+	// O(n)
 	for (u_int _index = 0; _index < _coordinatesCellAliveSize; _index++)
 	{
 		Coordinate* _currentCoordinate = coordinatesCellAlive[_index];
@@ -120,6 +167,8 @@ void Game::AddPointToNeighbourCell()
 		}
 
 	}
+	
+	// O(n)
 	const u_int& _garbageSize = (u_int)_garbageCoord.size();
 	for (u_int _index = 0; _index < _garbageSize; _index++)
 	{
@@ -219,6 +268,7 @@ void Game::CheckCellAlive()
 
 bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
 {
+	// O(n)
 	const u_int& _coordinatesCellAliveCount = static_cast<const u_int&>(coordinatesCellAlive.size());
 	for (u_int _index = 0; _index < _coordinatesCellAliveCount; _index++)
 	{
@@ -426,6 +476,43 @@ bool Game::ChooseMainMenu(const int _menuIndex)
 
 /* ========== Prefab ========== */
 
+void Game::SavePrefab(const string& _name)
+{
+	fstream _ofstream = fstream("Pattern\\PrefabNames.txt", ios::app);
+	_ofstream << _name;
+
+	fstream _newFile = fstream("Pattern\\" + _name + ".txt", ios::app);
+
+	string _parameter;
+	_parameter += _name + " " + to_string(grid->GetLength()) + " " + to_string(grid->GetWidth());
+	_newFile << _parameter + "\n";
+
+	auto glambda = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->y < _secondCoordinate->y; };
+	sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), glambda);
+
+	int _currentLineAxis =  0;
+	int _currentLineAxisCount = 0;
+	int _lowest = coordinatesCellAlive[_currentLineAxis]->y;
+	do
+	{
+		_currentLineAxis++;
+
+	} while (coordinatesCellAlive[_currentLineAxis - 1]->y == coordinatesCellAlive[_currentLineAxis]->y);
+	sort(coordinatesCellAlive.begin() + _currentLineAxis, coordinatesCellAlive.begin() + _currentLineAxis + _currentLineAxisCount);
+	string _line;
+	int _start0 = 0;
+	int _limitOf0 = coordinatesCellAlive[_currentLineAxis]->x;
+	for (u_int _inedx = _start0; _inedx < _limitOf0; _inedx++)
+	{
+		_line += "0";
+	}
+	_line += "1";
+	_newFile << _line;
+	_start0 = coordinatesCellAlive[_currentLineAxis]->x;
+	
+
+}
+
 /// <summary>
 /// Permet d'initialiser un glider sur une coordonnée donner
 /// </summary>
@@ -591,7 +678,7 @@ void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, i
 
 void Game::DisplayInfos()
 {
-	DISPLAY("\n\n\n\n\n\nNombre d'Itérations : " + to_string(iterationCount), true);
+	DISPLAY("\n\n\n\n\n\nNombre d'Itérations : " + to_string(generation), true);
 
 	DISPLAY("\nPress 'A' to Previous Iteration\t\tPress 'E' to Next Iteration", true);
 	DISPLAY("\nPress 'F' to Auto Mode\t\t\tPress 'Enter' to Select Cell", true);

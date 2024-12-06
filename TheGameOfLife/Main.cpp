@@ -13,7 +13,7 @@ int main()
 
 
 	// max 50 x 50 avec la grille sinon 100 x 100
-	Game _game({ 100,100 });
+	Game _game({ 50,50 });
 	_game.Loop();
 
 	return EXIT_SUCCESS;
