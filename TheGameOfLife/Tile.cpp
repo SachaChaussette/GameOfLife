@@ -8,11 +8,7 @@ Tile::Tile(Coordinate* _coordinate)
 	neighbourCount = 0;
 }
 
-Tile::Tile(const string& _appearance, const u_int& _weight)
-{
-	appearance = _appearance;
-	neighbourCount = _weight;
-}
+
 
 Tile::~Tile()
 {
@@ -37,34 +33,15 @@ void Tile::UpdateNeighbourCount(const int _point)
 	neighbourCount += _point;
 }
 
-CellState Tile::UpdateCellState(/*const int _appearanceType*/)
+CellState Tile::UpdateCellState()
 {
-	if (neighbourCount == 2) return state;
+	if (neighbourCount == 2)
+	{
+		return state;
+	}
 	else if (neighbourCount == 3)
 	{
-		/*switch (_appearanceType)
-		{
-		case 0:
-			appearance = BG_WHITE;
-			break;
-		case 1:
-			appearance = BG_DARK_GRAY;
-			break;
-		case 2:
-			appearance = BG_GREEN;
-			break;
-		case 3:
-			appearance = BG_RED;
-			break;
-		case 4:
-			appearance = RESET;
-			break;
-		default:
-			break;
-		}*/
-		
 		appearance = BG_WHITE;
-
 		state = CT_ALIVE;
 		return state;
 	}

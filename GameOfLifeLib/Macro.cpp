@@ -51,6 +51,13 @@ int Random::GetRandomNumberInRange(const int _min, const int _max)
 	return _distr(_gen); // Génération du nombre
 }
 
+Stream::StreamSystem::StreamSystem()
+{
+	openMode = ios_base::in;
+	filePath = "None";
+	stream = fstream(filePath,openMode);
+}
+
 /* =============== Flux =============== */
 Stream::StreamSystem::StreamSystem(const string& _folderPath, const string& _filePath,
 	const string& _fileExtension, const ios_base::openmode& _openMode)

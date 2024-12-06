@@ -55,5 +55,9 @@
     <Text Include="MainMenuAscii_En.txt">
       <Filter>Header Files</Filter>
     </Text>
+    <Text Include="Pattern\Block.txt" />
+    <Text Include="Pattern\Glider.txt" />
+    <Text Include="Pattern\Gun.txt" />
+    <Text Include="Pattern\PrefabNames.txt" />
   </ItemGroup>
 </Project>

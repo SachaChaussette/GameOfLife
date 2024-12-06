@@ -44,7 +44,7 @@ void Grid::Setup()
 	}
 }
 
-void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect) const
+void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect)
 {
 	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
 	{
@@ -67,7 +67,6 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect)
 			}
 			DISPLAY("  ", false);
 		}
-		// TODO UPDATE : Plus de curseur dans le Display
 		if (_withGrid) DISPLAY("|", true);
 	}
 	if (_withGrid)
@@ -79,42 +78,4 @@ void Grid::Display(const bool _withGrid, const pair<int, int>& _indexesToSelect)
 		}
 		DISPLAY("+", true);
 	}
-}
-
-string Grid::ToString(const bool _withGrid) const
-{
-	string _text;
-
-	for (u_int _rowIndex = 0; _rowIndex < length; _rowIndex++)
-	{
-		if (_withGrid)
-		{
-			_text += "+";
-			for (u_int _index = 0; _index < width; _index++)
-			{
-				_text += "----";
-				_text += "+";
-			}
-			_text += "\n";
-		}
-
-		for (u_int _colIndex = 0; _colIndex < width; _colIndex++)
-		{
-			if (_withGrid) _text += "| ";
-			_text += tiles[_rowIndex][_colIndex]->ToString(false);
-			_text += " ";
-		}
-		_text += _withGrid ? "|\n" : "\n";
-	}
-	if (_withGrid)
-	{
-		for (u_int _index = 0; _index < width; _index++)
-		{
-			_text += "+";
-			_text += "----";
-		}
-		_text += "+\n";
-	}
-
-	return _text;
 }

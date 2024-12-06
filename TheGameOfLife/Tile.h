@@ -9,7 +9,6 @@ enum CellState
 	CT_ALIVE,
 };
 
-
 class Tile
 {
 	Coordinate* coordinate;
@@ -52,18 +51,14 @@ public:
 	}
 public:
 	Tile(Coordinate* _coordinate);
-
-	Tile(const string& _appearance, const u_int& _weight);
-
 	~Tile();
 
 public:
 	void UpdateNeighbourCount(const int _point);
-	CellState UpdateCellState(/*const int _appearanceType*/);
+	CellState UpdateCellState();
 	void ResetNeigbourCount();
 	void Display(const bool _debug) const;
 	void RemoveCell();
 	string ToString(const bool _debug);
-
 };
 

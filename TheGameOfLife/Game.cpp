@@ -4,28 +4,25 @@
 
 using namespace Stream;
 
-Game::Game()
-{
-	hwnd = GetForegroundWindow();
-	consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	cursorInfo->dwSize = 100;
-	cursorInfo->bVisible = FALSE;
-
-
-	grid = new Grid();
-	iterationCount = 0;
-}
-
 Game::Game(const int _width, const int _length)
 {
 	hwnd = GetForegroundWindow();
 	consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
 	cursorInfo = new CONSOLE_CURSOR_INFO();
 	cursorInfo->dwSize = 100;
 	cursorInfo->bVisible = FALSE;
 
 	grid = new Grid(_width, _length);
-	iterationCount = 0;
+
+	isDebug = 0;
+	isGrid = 0;
+	isFr = 0;
+
+	generationCount = 0;
+	speed = 100;
+
+	inputType = IT_COUNT;
 }
 
 Game::~Game()
@@ -39,31 +36,103 @@ Game::~Game()
 
 void Game::NextIteration()
 {
-	iterationCount++;
+	generationCount++;
 	AddPointToNeighbourCell();
 	CheckCellAlive();
 	DisplayCell(oldCoordinatesCellAlive, true);
-
 }
 
 void Game::AutoIteration()
 {
-	while (!_kbhit())
+	while (true)
 	{
+		int _input = 0;
+		if (speed < 0) speed = 1;
 		DisplayCell(coordinatesCellAlive);
+
+		if (_kbhit())
+		{
+			_input = _getch();
+			if (_input == IT_J) speed += 20;
+			else if (_input == IT_K)  speed -= 5;
+			else if (_input == IT_F) break;
+			
+		}
+
 		NextIteration();
+	}
+
+
+	//do
+	//{
+	//	_input = 0;
+
+	//	if (_input == IT_J) speed += 20;
+	//	else if (_input == IT_K) speed -= 20;
+	//	else if (speed < 0) speed = 0;
+
+	//	DisplayCell(coordinatesCellAlive);
+	//	Sleep(speed);
+	//	NextIteration();
+	//} while (_input == IT_K || _input == IT_J || !_kbhit());
+	
+	
+}
+
+void Game::Clear()
+{
+	for (Coordinate* _element : coordinatesCellAlive)
+	{
+		grid->GetTile(_element)->RemoveCell();
+	}
+	CheckCellAlive();
+}
+
+void Game::InitPrefabByFile(const string& _prefabName, const int _posX, const int _posY)
+{
+	string _paternName;
+	u_int _length;
+	u_int _width;
+	
+	ifstream _stream = ifstream("Pattern\\" + _prefabName + ".txt");
+	
+	if (!_stream)
+	{
+			cerr << "ERROR => the file : " << _prefabName << " doesn't exist !" << endl;
+			return;
+	}
+
+	_stream >> _paternName;
+	_stream >> _length;
+	_stream >> _width;
+	delete grid;
+	grid = new Grid(_length, _width);
+	coordinatesCellAlive = oldCoordinatesCellAlive = vector<Coordinate*>();
+	int _lineIndex = -1;
+	string _line;
+	while (getline(_stream, _line))
+	{
+		if (_lineIndex != -1)
+		{
+			u_int _lineSize = static_cast<u_int>(_line.size());
+			int _binary;
+			for (u_int _index = 0; _index < _lineSize; _index++)
+			{
+				_binary = _line[_index] - '0';
+				if (_binary == 1)InitNewAliveCell(_index, _lineIndex);
+			}
+		}
+		++_lineIndex;
 	}
 }
 
 void Game::Loop()
 {
-
-	InitPrimordialSoup();
-	//InitGun(5,5);
+	bool _isOver = false;
 	do
 	{
-		MainMenu();
-	} while (true);
+		_isOver = MainMenu();
+	} while (!_isOver);
 }
 
 
@@ -221,6 +290,18 @@ bool Game::IsAlreadyAlive(Coordinate _coordinateToCheck)
 	return false;
 }
 
+/// <summary>
+/// Permet d'initialiser une nouvelle cellulle vivante
+/// </summary>
+/// <param name="_x"></param>
+/// <param name="_y"></param>
+void Game::InitNewAliveCell(const int _x, const int _y)
+{
+	Tile* _tempTile = grid->GetTile(_x, _y);
+	_tempTile->UpdateNeighbourCount(3);
+	PushCoordinateCellAlive(_tempTile->GetCoordinate());
+}
+
 
 /* ========== Menus =========== */
 
@@ -265,21 +346,12 @@ pair<int, int> Game::ChooseInputAndRetrieveCoords(const int _optionsCount, pair<
 		case IT_DOWN:
 			_pairOfIndexes.first = (_pairOfIndexes.first >= _optionsCount - 1 ? 0 : _pairOfIndexes.first + 1);
 			break;
-		case IT_A:
-			// TODO Previous Iteration
-			break;
 		case IT_E:
 			NextIteration();
 			break;
 		case IT_F:
 			AutoIteration();
 			break;
-		case IT_G:
-			return { -3,-3 };
-		case IT_DEBUG:
-			return { -2,-2 };
-		
-
 		default:
 			break;
 		}
@@ -292,6 +364,7 @@ void Game::DisplayMenu(const string* _options, const int& _indexToSelect, const 
 {
 	string _firstSymbol = "[";
 	string _secondSymbol = "]";
+	string _color = RESET;
 
 	for (u_int _index = 0; _index < _optionsCount; _index++)
 	{
@@ -299,76 +372,134 @@ void Game::DisplayMenu(const string* _options, const int& _indexToSelect, const 
 		{
 			_firstSymbol = " ";
 			_secondSymbol = " ";
+			_color = GRAY;
 		}
 		else
 		{
 			_firstSymbol = "[";
 			_secondSymbol = "]";
+			_color = YELLOW;
 		}
 
-		DISPLAY(_firstSymbol << _options[_index] << _secondSymbol << "\t", false);
+		DISPLAY(_firstSymbol << _color << _options[_index] << RESET << _secondSymbol << "   ", false);
 	}
 }
 
-void Game::MainMenu()
+bool Game::MainMenu()
 {
-	string _actions[2]
-	{
-		"Play",
-		"Quit"
-	};
-	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
-
+	const u_int& _actionsCount = 2;
+	string* _actions = nullptr;
+	
 	int _index = 0;
-
+	bool _isOver = false;
 	do
 	{
-		SetConsoleCursorPosition(consoleHandle, { 0,0 });
-		SetConsoleCursorInfo(consoleHandle, cursorInfo);
 		StreamSystem _it;
-		if (isFr) _it = StreamSystem("", "MainMenuAscii_Fr", "txt", ios_base::in);
-		else _it = StreamSystem("", "MainMenuAscii_En", "txt", ios_base::in);
-		_it.DisplayByRow(60, 0);
 
+		if (isFr)
+		{
+			delete[] _actions;
+			_it = StreamSystem("", "MainMenuAscii_Fr", "txt", ios_base::in);
+
+			_actions = new string[_actionsCount]
+			{
+				"Jouer",
+				"Quitter"
+			};
+		}
+		else 
+		{ 
+			delete[] _actions;
+			_it = StreamSystem("", "MainMenuAscii_En", "txt", ios_base::in); 
+
+			_actions = new string[_actionsCount]
+			{
+				"Play",
+				"Quit"
+			};
+		}
+
+		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+
+		SetConsoleCursorPosition(consoleHandle, { 0,0 });
+		DISPLAY(BLINK_TEXT, false);
+		_it.DisplayByRow(40, 0);
+		DISPLAY(RESET, false);
+		
 		_index = ChooseInputFromMainMenuAndRetrieveIndex(_actionsCount - 1, _index);
-		SetConsoleCursorPosition(consoleHandle, { 100,60 });
+
+		SetConsoleCursorPosition(consoleHandle, { 95,45 });
 		DisplayMenu(_actions, _index, _actionsCount, "");
 
-		DISPLAY("\n===================", true);
-		DISPLAY("Made By VT And Sacha", true);
-
-		if (_index == -1) return;
+		if (isFr) 
+		{
+			DISPLAY("\nFait Par VT Et Sacha", true);
+		}
+		else 
+		{
+			DISPLAY("\nMade By VT And Sacha", true);
+		}
 		
-	} while (true);
+		if (_index == -1) _isOver = true;
+		
+	} while (!_isOver);
 
+	delete[] _actions;
+	return _isOver;
 }
 
 void Game::OptionMenu()
 {
-	string _actions[5]
-	{
-		"Empty Grid",
-		"Priomordial Soup",
-		"Glider",
-		"Glider Gun",
-		"Block"
-	};
-	const u_int& _actionsCount = sizeof(_actions) / sizeof(string);
+	const u_int& _actionsCount = 7;
+	string* _actions = nullptr;
 
 	int _index = 0;
-
+	bool _isOver = false;
 	do
 	{
-		SetConsoleCursorPosition(consoleHandle, { 100,20 });
-		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+		if (!isFr)
+		{
+			delete[] _actions;
+			_actions = new string[_actionsCount]
+			{
+				"Show Grid",
+				"Primordial Soup",
+				"Glider",
+				"Glider Gun",
+				"Block",
+				"Clear Grid",
+				"Quit"
+			};
+		}
+		else
+		{
+			delete[] _actions;
+			_actions = new string[_actionsCount]
+			{
+				"Afficher la Grille",
+				"Soupe Primordiale",
+				"Glider",
+				"Canon à Glider",
+				"Bloc",
+				"Clear la Grille",
+				"Quitter"
+			};
+		}
 
 		_index = ChooseInputFromOptionMenuAndRetrieveIndex(_actionsCount - 1, _index);
+
+		SetConsoleCursorPosition(consoleHandle, { 60,20 });
+		SetConsoleCursorInfo(consoleHandle, cursorInfo);
+
 		DisplayMenu(_actions, _index, _actionsCount, "");
 
-		if (_index == -1) return;
+		DisplayInfos();
 
-	} while (true);
+		if (_index == -1) _isOver = true;
 
+	} while (!_isOver);
+
+	delete[] _actions;
 }
 
 void Game::GridMenu()
@@ -377,6 +508,7 @@ void Game::GridMenu()
 	pair<int, int> _oldPairOfIndexes;
 
 	grid->Display(isGrid, _pairOfIndexes);
+	bool _isOver = false;
 	do
 	{
 		_oldPairOfIndexes = _pairOfIndexes;
@@ -385,16 +517,20 @@ void Game::GridMenu()
 		_pairOfIndexes = ChooseInputAndRetrieveCoords(grid->GetLength(), _pairOfIndexes);
 
 		// Quitter
-		if (_pairOfIndexes.first == -1 && _pairOfIndexes.second == -1) return;
+		if (_pairOfIndexes.first == -1 && _pairOfIndexes.second == -1) _isOver = true;
+
+		// Colors
+		if (_pairOfIndexes.first == -2 && _pairOfIndexes.second == -2) _isOver = true;
 
 		DisplayCursor(_pairOfIndexes, _oldPairOfIndexes);
 
 		DisplayCell(coordinatesCellAlive, false);
 
 		CheckCellAlive();
-		//DisplayInfos();
 
-	} while (true);
+	} while (!_isOver);
+
+	system("cls");
 }
 
 int Game::ChooseInputFromMainMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex)
@@ -402,13 +538,12 @@ int Game::ChooseInputFromMainMenuAndRetrieveIndex(const int _optionsCount, int _
 	bool _wantToReturn = false;
 	if (_kbhit())
 	{
-		// Attendre une touche
 		u_int _input = 0;
 		_input = _getch();
 
 		switch (_input)
 		{
-		case IT_ENTER: // Entrer
+		case IT_ENTER:
 			_wantToReturn = ChooseMainMenu(_currentIndex);
 			if (_wantToReturn) return -1;
 			break;
@@ -423,7 +558,6 @@ int Game::ChooseInputFromMainMenuAndRetrieveIndex(const int _optionsCount, int _
 		}
 	}
 	return _currentIndex;
-
 }
 
 int Game::ChooseInputFromOptionMenuAndRetrieveIndex(const int _optionsCount, int _currentIndex)
@@ -431,14 +565,13 @@ int Game::ChooseInputFromOptionMenuAndRetrieveIndex(const int _optionsCount, int
 	bool _wantToReturn = false;
 	if (_kbhit())
 	{
-		// Attendre une touche
 		u_int _input = 0;
 		_input = _getch();
 
 		switch (_input)
 		{
-		case IT_ENTER: // Entrer
-			_wantToReturn = ChooseMainMenu(_currentIndex);
+		case IT_ENTER:
+			_wantToReturn = ChooseOptionMenu(_currentIndex);
 			if (_wantToReturn) return -1;
 			break;
 		case IT_LEFT:
@@ -455,6 +588,10 @@ int Game::ChooseInputFromOptionMenuAndRetrieveIndex(const int _optionsCount, int
 			// Toggle Debug
 			++isDebug %= 2;
 			break;
+		case IT_L:
+			// Toggle Language
+			++isFr %= 2;
+			return -1;
 		default:
 			break;
 		}
@@ -467,12 +604,12 @@ bool Game::ChooseMainMenu(const int _menuIndex)
 {
 	switch (_menuIndex)
 	{
-	case AT_GRID:
+	case MAT_PLAY:
 		system("cls");
 		OptionMenu();
 		system("cls");
 		break;
-	case AT_QUIT:
+	case MAT_QUIT:
 		return true;
 	}
 	return false;
@@ -480,12 +617,26 @@ bool Game::ChooseMainMenu(const int _menuIndex)
 
 bool Game::ChooseOptionMenu(const int _menuIndex)
 {
+	system("cls");
 	switch (_menuIndex)
 	{
 	case AT_GRID:
-		system("cls");
 		GridMenu();
-		system("cls");
+		break;
+	case AT_SOUP:
+		InitPrimordialSoup();
+		break;
+	case AT_GLIDER:
+		InitPrefabByFile("Glider", 5, 5);
+		break;
+	case AT_GLIDER_GUN:
+		InitPrefabByFile("Gun", 5, 5);
+		break;
+	case AT_BLOCK:
+		InitPrefabByFile("Block", 5, 5);
+		break;
+	case AT_CLEAR:
+		Clear();
 		break;
 	case AT_QUIT:
 		return true;
@@ -494,85 +645,65 @@ bool Game::ChooseOptionMenu(const int _menuIndex)
 }
 
 
+
+
 /* ========== Prefab ========== */
 
-/// <summary>
-/// Permet d'initialiser un glider sur une coordonnée donner
-/// </summary>
-/// <param name="_x"></param>
-/// <param name="_y"></param>
-void Game::InitGlider(const int _x, const int _y)
+void Game::SavePrefab(const string& _name)
 {
-	InitNewAliveCell(0 + _x, 1 + _y);
-	InitNewAliveCell(1 + _x, 2 + _y);
-	InitNewAliveCell(2 + _x, 0 + _y);
-	InitNewAliveCell(2 + _x, 1 + _y);
-	InitNewAliveCell(2 + _x, 2 + _y);
-}
+	fstream _ofstream = fstream("Pattern\\PrefabNames.txt", ios::app);
+	_ofstream << _name + "\n";
 
-void Game::InitBlock(const int _x, const int _y)
-{
-	InitNewAliveCell(0 + _x, 0 + _y);
-	InitNewAliveCell(0 + _x, 1 + _y);
-	InitNewAliveCell(1 + _x, 0 + _y);
-	InitNewAliveCell(1 + _x, 1 + _y);
-}
+	fstream _newFile = fstream("Pattern\\" + _name + ".txt", ios::app);
 
-void Game::InitGunPart1(const int _x, const int _y)
-{
-	InitNewAliveCell(10 + _x, _y);
-	InitNewAliveCell(10 + _x, 1 + _y);
-	InitNewAliveCell(10 + _x, 2 + _y);
+	string _parameter;
+	_parameter += _name + " " + to_string(grid->GetLength()) + " " + to_string(grid->GetWidth());
+	_newFile << _parameter + "\n";
 
-	InitNewAliveCell(11 + _x, -1 + _y);
-	InitNewAliveCell(11 + _x, 3 + _y);
+	auto _yPriority = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->y < _secondCoordinate->y; };
+	sort(coordinatesCellAlive.begin(), coordinatesCellAlive.end(), _yPriority);
 
-	InitNewAliveCell(12 + _x, -2 + _y);
-	InitNewAliveCell(12 + _x, 4 + _y);
+	const u_int _lastY = static_cast<int>(coordinatesCellAlive[coordinatesCellAlive.size() - 1]->y);
+	const u_int _coordinateCellAliveSize = static_cast<int>(coordinatesCellAlive.size());
 
-	InitNewAliveCell(13 + _x, -2 + _y);
-	InitNewAliveCell(13 + _x, 4 + _y);
+	int _occurence = 0;
+	int _indexLine = 0;
+	for (u_int _inedx = 0; _inedx < _lastY + 1; _inedx++)
+	{
+		do
+		{
+			++_occurence;
+		} while ((_indexLine + _occurence) != _coordinateCellAliveSize && (coordinatesCellAlive[_indexLine]->y == coordinatesCellAlive[_indexLine + _occurence]->y));
 
-	InitNewAliveCell(14 + _x, 1 + _y);
-}
+		auto _xPriority = [](Coordinate* _firstCoordinate, Coordinate* _secondCoordinate) { return _firstCoordinate->x < _secondCoordinate->x; };
+		sort(coordinatesCellAlive.begin() + _indexLine, coordinatesCellAlive.begin() + _indexLine + _occurence, _xPriority);
 
-void Game::InitGun(const int _x, const int _y)
-{
-	InitBlock(_x, _y);
-	InitBlock(_x + 34, _y - 2);
+		string _line;
 
-	InitGunPart1(_x, _y);
+		int _start0 = 0;
+		for (int _index = _indexLine; _index < _indexLine + _occurence; _index++)
+		{
+			int _limitOf0 = coordinatesCellAlive[_index]->x;
+			for (int _inedx = _start0; _inedx < _limitOf0 - 1; _inedx++)
+			{
+				_line += "0";
+			}
+			_line += "1";
+			_start0 = coordinatesCellAlive[_index]->x;
 
-	InitNewAliveCell(15 + _x, -1 + _y);
-	InitNewAliveCell(15 + _x, 3 + _y);
+		}
+		_newFile << _line + "\n";
 
-	InitNewAliveCell(16 + _x, _y);
-	InitNewAliveCell(16 + _x, 1 + _y);
-	InitNewAliveCell(16 + _x, 2 + _y);
+		_indexLine += _occurence;
+		_occurence = 0;
 
-	InitNewAliveCell(17 + _x, 1 + _y);
-
-	InitNewAliveCell(20 + _x, -2 + _y);
-	InitNewAliveCell(20 + _x, -1 + _y);
-	InitNewAliveCell(20 + _x, _y);
-
-	InitNewAliveCell(21 + _x, -2 + _y);
-	InitNewAliveCell(21 + _x, -1 + _y);
-	InitNewAliveCell(21 + _x, _y);
-
-	InitNewAliveCell(22 + _x, -3 + _y);
-	InitNewAliveCell(22 + _x, 1 + _y);
-
-	InitNewAliveCell(24 + _x, -4 + _y);
-	InitNewAliveCell(24 + _x, -3 + _y);
-	InitNewAliveCell(24 + _x, 1 + _y);
-	InitNewAliveCell(24 + _x, 2 + _y);
+	}
 
 }
 
 void Game::InitPrimordialSoup()
 {
-	const int _x = grid->GetLength();
+	const int _x = grid->GetWidth();
 	const int _y = grid->GetLength();
 	const u_int& _numberOfNewCell = (_x * _y) / 2;
 	for (u_int _index = 0; _index < _numberOfNewCell; _index++)
@@ -581,17 +712,7 @@ void Game::InitPrimordialSoup()
 	}
 }
 
-/// <summary>
-/// Permet d'initialiser une nouvelle cellulle vivante
-/// </summary>
-/// <param name="_x"></param>
-/// <param name="_y"></param>
-void Game::InitNewAliveCell(const int _x, const int _y)
-{
-	Tile* _tempTile = grid->GetTile(_x, _y);
-	_tempTile->UpdateNeighbourCount(3);
-	PushCoordinateCellAlive(_tempTile->GetCoordinate());
-}
+
 
 
 /* ========== Display ========== */
@@ -620,7 +741,7 @@ void Game::DisplayCell(const vector<Coordinate*>& _cellCoordinates, const bool _
 			grid->GetTile(_coordinate)->Display(isDebug);
 		}
 	}
-	if (!_unDisplay) Sleep(100);
+	if (!_unDisplay) Sleep(speed);
 }
 
 void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, int>& _oldPairOfIndexes)
@@ -661,9 +782,36 @@ void Game::DisplayCursor(const pair<int, int>& _pairOfIndexes, const pair<int, i
 
 void Game::DisplayInfos()
 {
-	DISPLAY("\n\n\n\n\n\nNombre d'Itérations : " + to_string(iterationCount), true);
+	for (u_int _index = 0; _index < 12; _index++)
+	{
+		DISPLAY("", true);
+	}
+	if (isFr)
+	{
+		DISPLAY("Nombre de Génération : " + to_string(generationCount), true);
+		DISPLAY("Vitesse Actuel (en millisecondes) : " + to_string(speed), true);
 
-	DISPLAY("\nPress 'A' to Previous Iteration\t\tPress 'E' to Next Iteration", true);
-	DISPLAY("\nPress 'F' to Auto Mode\t\t\tPress 'Enter' to Select Cell", true);
-	DISPLAY("\n\nPress 'Echap' to Quit\t", true);
+		DISPLAY("\n\nRaccourcis du Menu :\n", true);
+		DISPLAY("Appuyer sur 'L' pour Changer la Langue\t\tAppuyer sur 'G' pour Afficher la Grille\n", true);
+
+		DISPLAY("\n\nRaccourcis de la Grille :\n", true);
+		DISPLAY("Appuyer sur 'E' pour la Génération Suivante", true);
+		DISPLAY("\nAppuyer sur 'F' pour le Mode Auto", true);
+		DISPLAY("\nAppuyer sur 'J' lors du Mode Auto pour Réduire la Vitesse\nAppuyer sur 'K' lors du Mode Auto pour Augmenter la Vitesse", true);
+		DISPLAY("\n\nAppuyer sur 'Echap' pour Quitter\tAppuyer sur 'Enter' pour Sélectionner une Cellule", false);
+	}
+	else
+	{
+		DISPLAY("Generation Count : " + to_string(generationCount), true);
+		DISPLAY("Current Speed (in milliseconds) : " + to_string(speed), true);
+
+		DISPLAY("\n\nMenu Hotkeys :\n", true);
+		DISPLAY("Press 'L' to Change Language\tPress 'G' to Display Grid", true);
+
+		DISPLAY("\n\nGrid Hotkeys :\n", true);
+		DISPLAY("Press 'E' to Next Generation", true);
+		DISPLAY("\nPress 'F' to Auto Mode", true);
+		DISPLAY("\nPress 'J' while in Auto Mode to Decrease Speed\ntPress 'K' while in Auto Mode to Increase Speed", true);
+		DISPLAY("\n\nPress 'Echap' to Quit\t\t\tPress 'Enter' to Select Cell", false);
+	}	
 }

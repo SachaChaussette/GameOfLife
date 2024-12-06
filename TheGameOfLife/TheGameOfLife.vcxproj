@@ -150,6 +150,10 @@
   <ItemGroup>
     <Text Include="MainMenuAscii_En.txt" />
     <Text Include="MainMenuAscii_Fr.txt" />
+    <Text Include="Pattern\Block.txt" />
+    <Text Include="Pattern\Glider.txt" />
+    <Text Include="Pattern\Gun.txt" />
+    <Text Include="Pattern\PrefabNames.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
